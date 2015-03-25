@@ -19,7 +19,7 @@ def processNtuple(inFileName, inDirName, outDirName,category):
   mychain = gDirectory.Get( inTreeName )
   
   # output
-  outFileName = "%s/%s_EtaPtWeightHisto.root" %(outDirName, inFileName.rsplit(".",1)[0])
+  outFileName = "%s/%s_EtaPtWeightHisto.root" %(outDirName, inFileName.replace("_forTraining", "").rsplit(".",1)[0])
   print "Writing to %s" %outFileName
   outFile = TFile( outFileName, 'recreate' )
 
@@ -55,7 +55,8 @@ def main():
       # processNtuple(inFileName, inDirName, outDirName)
       # break
       sample = inFileName.replace("_forTraining", "").split("_",1)[0]
-      sample2 = sample.replace(".root","")
+      sample = sample.replace(".root","")
+      print sample
       key = "%s" %(sample)
       if key not in flavourCategoryDict:
         flavourCategoryDict[key] = []
