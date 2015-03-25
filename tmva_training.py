@@ -54,7 +54,7 @@ def train(bdtoptions):
   treeS = ROOT.TChain('Fjets')
   treeB = ROOT.TChain('Fjets')
   files = [
-    "QCD170-300_forTraining.root"	, "QCD300-470_forTraining.root"	,"QCD470-600_forTraining.root","QCD600-800_forTraining.root","QCD800-1000_forTraining.root"	,"QCD1000-1400_forTraining.root"
+    "rootfiles/QCD170-300_forTraining.root"	, "rootfiles/QCD300-470_forTraining.root"	,"rootfiles/QCD470-600_forTraining.root","rootfiles/QCD600-800_forTraining.root","rootfiles/QCD800-1000_forTraining.root"	,"rootfiles/QCD1000-1400_forTraining.root"
   ]
   
   xSec = [12030.,
@@ -90,7 +90,7 @@ def train(bdtoptions):
     # tree.SetWeight(weight)
     
   
-  treeS.Add('R800_forTraining.root')
+  treeS.Add('rootfiles/R800_forTraining.root')
   # treeB.Add('QCD1000-1400_forTraining.root')
  #  treeB.Add('QCD170-300_forTraining.root')
  #  treeB.Add('QCD300-470_forTraining.root')
