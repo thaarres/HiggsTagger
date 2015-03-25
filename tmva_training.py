@@ -126,9 +126,10 @@ def train(bdtoptions):
   
 
   
-  factory.PrepareTrainingAndTestTree( ROOT.TCut(signal_selection), ROOT.TCut(background_selection),
-                                      "nTrain_Signal=30000:nTest_Signal=12000:nTrain_Background=30000:nTest_Background=50000:SplitMode=Random:!V" )
-
+  factory.PrepareTrainingAndTestTree( ROOT.TCut(signal_selection), ROOT.TCut(background_selection), 
+      "nTrain_Signal=30000:nTest_Signal=12000:nTrain_Background=30000:nTest_Background=50000:SplitMode=Random:!V" )
+      
+  factory.BookMethod( ROOT.TMVA.Types.kFisher, "Fisher", "!H:!V:Fisher" )
   factory.BookMethod( ROOT.TMVA.Types.kBDT,
                       "BDTG",
                       # "!H:!V:NTrees=1000:BoostType=Grad:Shrinkage=0.05:UseBaggedGrad:GradBaggingFraction=0.9:SeparationType=GiniIndex:nCuts=500:NNodesMax=5"
@@ -136,7 +137,7 @@ def train(bdtoptions):
                     )
 
 
-  # (ROOT.TMVA.gConfig().GetVariablePlotting()).fMaxNumOfAllowedVariablesForScatterPlots = 2
+  (ROOT.TMVA.gConfig().GetVariablePlotting()).fMaxNumOfAllowedVariablesForScatterPlots = 2
   factory.TrainAllMethods()
 
   # factory.OptimizeAllMethods()
@@ -147,9 +148,9 @@ def train(bdtoptions):
 
   outFile.Close()
 
-##   ROOT.gROOT.LoadMacro('$ROOTSYS/tmva/test/TMVAGui.C')
-##   ROOT.TMVAGui('TMVA_classification.root')
-##   raw_input("Press Enter to continue...")
+  ROOT.gROOT.LoadMacro('$ROOTSYS/tmva/test/TMVAGui.C')
+  ROOT.TMVAGui('TMVA_classification.root')
+  raw_input("Press Enter to continue...")
 
 
 
@@ -250,39 +251,44 @@ def train(bdtoptions):
 #     fout.Close()
 #   print "done", inFileName
 # 
-# def readParallel():
-#
-#   print "start readParallel()"
-#   ROOT.gROOT.SetBatch(True)
-#   parallelProcesses = multiprocessing.cpu_count()
-#
-#   #inDirName="dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/vlambert/TMVA/ctag_CSVMLP_IVFadapv1/Weighted/"
-#  # inDirName="dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/t3groups/uniz-higgs/Phys14/RSGravitonToWW_kMpl01_M_2000_Tune4C_13TeV_pythia8/"
-#   files = [
-#    "/shome/thaarres/TMVA_btag/CMSSW_7_3_0/src/RecoBTag/BTagAnalyzerLite/test/Graviton10k.root",
-#    "/shome/thaarres/TMVA_btag/CMSSW_7_3_0/src/RecoBTag/BTagAnalyzerLite/test/QCD10k.root"
-#     ]
-#   #files ["CombinedSVV2NoVertex_B.root"]
-#
-#   #for inFileName in os.listdir(inDirName):
-#   #  if inFileName.endswith(".root") and not (inFileName.find("Eta") >= 0):
-#   #    files.append(inFileName)
-#
-#   # create Pool
-#   p = multiprocessing.Pool(parallelProcesses)
-#   print "Using %i parallel processes" %parallelProcesses
-#
-#   for f in files:
-#     # debug
-#     # read(inDirName, f)
-#      read(f)
-#     # break
-#     # run jobs
-#     #p.apply_async(read, args = (inDirName, f,))
-#
-#   p.close()
-#   p.join()
-#
+def readParallel():
+
+  print "start readParallel()"
+  ROOT.gROOT.SetBatch(True)
+  parallelProcesses = multiprocessing.cpu_count()
+
+  inDirName="/shome/thaarres/HiggsTagger/rootfiles"
+  files = [
+    'R800_forTraining.root',
+    'QCD1000-1400_forTraining.root',
+    'QCD120-170_forTraining.root',
+    'QCD1400-1800_forTraining.root',
+    'QCD170-300_forTraining.root',
+    'QCD300-470_forTraining.root',
+    'QCD470-600_forTraining.root',
+    'QCD600-800_forTraining.root',
+    'QCD800-1000_forTraining.root',
+    ]
+  
+  for inFileName in os.listdir(inDirName):
+   if inFileName.endswith(".root") and not (inFileName.find("Eta") >= 0):
+     files.append(inFileName)
+
+  # create Pool
+  p = multiprocessing.Pool(parallelProcesses)
+  print "Using %i parallel processes" %parallelProcesses
+
+  for f in files:
+    # debug
+    # read(inDirName, f)
+     read(f)
+    # break
+    # run jobs
+    #p.apply_async(read, args = (inDirName, f,))
+
+  p.close()
+  p.join()
+
 
 
 if __name__ == '__main__':
