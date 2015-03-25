@@ -90,8 +90,8 @@ def processNtuple(inFileName, inDirName, histoDirName, outDirName, etaPtBins):
   # b_weight_etaPtInc = myTree.Branch( "weight_etaPtInc", weight_etaPtInc, 'weight_etaPtInc/F' )
   # b_weight_category = myTree.Branch( "weight_category", weight_category, 'weight_category/F' )
   # b_weight_norm = myTree.Branch( "weight_norm", weight_norm, 'weight_norm/F' )
- #  b_weight_flavour = myTree.Branch( "weight_flavour", weight_flavour, 'weight_flavour/F' )
-  b_weight = myTree.Branch( "weight", weight, 'weight/F' )
+  # b_weight_flavour = myTree.Branch( "weight_flavour", weight_flavour, 'weight_flavour/F' )
+  # b_weight = myTree.Branch( "weight", weight, 'weight/F' )
   # connect branches needed for weight calculation
   ptGroomed = array( "f", [ 0. ] )
   etaGroomed = array( "f", [ 0. ] )
@@ -125,14 +125,14 @@ def processNtuple(inFileName, inDirName, histoDirName, outDirName, etaPtBins):
  #    weight_norm[0] = getNormalization(category, flavour, etaPtBin, NormDict)
  #    weight_flavour[0] = flavourBias[flavour]
     # weight[0] = weight_etaPtInc[0] * weight_category[0] * weight_flavour[0] * weight_norm[0]
-      weight[0] = weight_etaPt[0]
+      # weight[0] = weight_etaPt[0]
     # and fill the branches
     b_weight_etaPt.Fill()
     # b_weight_etaPtInc.Fill()
     # b_weight_category.Fill()
     # b_weight_norm.Fill()
     # b_weight_flavour.Fill()
-    b_weight.Fill()
+    # b_weight.Fill()
     
   inFile.Write()
   histoFile.Close()
@@ -209,10 +209,10 @@ def main():
   for inFileName in os.listdir(inDirName):
     if inFileName.endswith(".root"): # and inFileName.startswith("skimmed_20k_eachptetabin"):
       # processNtuple(inFileName, inDirName, histoDirName, outDirName, etaPtBins, signalFlavours, biasDict, flavourBias)
-      processNtuple(inFileName, inDirName, histoDirName, outDirName, etaPtBins)
+      # processNtuple(inFileName, inDirName, histoDirName, outDirName, etaPtBins)
       # break
       # p.apply_async(processNtuple, args = (inFileName, inDirName, histoDirName, outDirName, etaPtBins, biasDict, flavourBias, NormDict))
-      # p.apply_async(processNtuple, args = (inFileName, inDirName, histoDirName, outDirName, etaPtBins))
+      p.apply_async(processNtuple, args = (inFileName, inDirName, histoDirName, outDirName, etaPtBins))
       
 
   p.close()
