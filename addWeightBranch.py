@@ -52,7 +52,7 @@ def getEtaPtWeight(etaGroomed, ptGroomed, h2EtaPt):
   
 
 # def processNtuple(inFileName, inDirName, histoDirName, outDirName, etaPtBins, biasDict, flavourBias, NormDict):
-def processNtuple(inFileName, inDirName, histoDirName, outDirName, etaPtBins):
+def processNtuple(inFileName, inDirName, histoDirName, outDirName):
     
   print "Starting to process %s" %inFileName
   
@@ -73,10 +73,8 @@ def processNtuple(inFileName, inDirName, histoDirName, outDirName, etaPtBins):
   
   # retrieve the ntuple of interest
   inFile = TFile.Open( "%s/%s" %(outDirName, inFileName), "update" ) # this now uses the copied file in outDirName
-  print inFile
   inTreeName = "Fjets"
   myTree = inFile.Get( inTreeName )
-  print myTree
   
   # create new branches
   weight_etaPt = array( "f", [ 0. ] )
@@ -84,7 +82,7 @@ def processNtuple(inFileName, inDirName, histoDirName, outDirName, etaPtBins):
 #   weight_category = array( "f", [ 0. ] )
 #   weight_norm = array( "f", [0. ] )
 #   weight_flavour = array( "f", [ 0. ] )
-  weight = array( "f", [ 0. ] )
+  # weight = array( "f", [ 0. ] )
 
   b_weight_etaPt = myTree.Branch( "weight_etaPt", weight_etaPt, 'weight_etaPt/F' )
   # b_weight_etaPtInc = myTree.Branch( "weight_etaPtInc", weight_etaPtInc, 'weight_etaPtInc/F' )
@@ -120,7 +118,7 @@ def processNtuple(inFileName, inDirName, histoDirName, outDirName, etaPtBins):
     # obtain the different weights
     weight_etaPt[0] = getEtaPtWeight(etaGroomed[0], ptGroomed[0], h2EtaPt)
     # weight_etaPtInc[0] = getEtaPtWeight(etaGroomed[0], ptGroomed[0], h2EtaPtI)
-    etaPtBin = getEtaPtBin(etaGroomed[0], ptGroomed[0], etaPtBins)
+    # etaPtBin = getEtaPtBin(etaGroomed[0], ptGroomed[0], etaPtBins)
     # weight_category[0] = getCategoryBias(category, flavour, etaPtBin, biasDict)
  #    weight_norm[0] = getNormalization(category, flavour, etaPtBin, NormDict)
  #    weight_flavour[0] = flavourBias[flavour]
@@ -151,33 +149,33 @@ def main():
     
   outDirName = '/shome/thaarres/HiggsTagger/weighted_rootfiles'
   histoDirName = '/shome/thaarres/HiggsTagger/EtaPtWeights'
-  inDirName = "/shome/thaarres/HiggsTagger/rootfiles"
+  inDirName = "/shome/thaarres/HiggsTagger/rootfiles/signal"
   
   weightHistName = "jets_lin"
 
   # category dependent bias for each flavour combination
-  etaPtBins = []
-  etaPtBins.append
-  etaPtBins.append("15 < ptGroomed <= 40 and abs(etaGroomed) <= 1.2")
-  etaPtBins.append("15 < ptGroomed <= 40 and 1.2 < abs(etaGroomed) <= 2.1")
-  etaPtBins.append("15 < ptGroomed <= 40 and abs(etaGroomed) > 2.1")
-  etaPtBins.append("40 < ptGroomed <= 60 and abs(etaGroomed) <= 1.2")
-  etaPtBins.append("40 < ptGroomed <= 60 and 1.2 < abs(etaGroomed) <= 2.1")
-  etaPtBins.append("40 < ptGroomed <= 60 and abs(etaGroomed) > 2.1")
-  etaPtBins.append("60 < ptGroomed <= 90 and abs(etaGroomed) <= 1.2")
-  etaPtBins.append("60 < ptGroomed <= 90 and 1.2 < abs(etaGroomed) <= 2.1")
-  etaPtBins.append("60 < ptGroomed <= 90 and abs(etaGroomed) > 2.1")
-  etaPtBins.append("90 < ptGroomed <= 150 and abs(etaGroomed) <= 1.2")
-  etaPtBins.append("90 < ptGroomed <= 150 and 1.2 < abs(etaGroomed) <= 2.1")
-  etaPtBins.append("90 < ptGroomed <= 150 and abs(etaGroomed) > 2.1")
-  etaPtBins.append("150 < ptGroomed <= 400 and abs(etaGroomed) <= 1.2")
-  etaPtBins.append("150 < ptGroomed <= 400 and 1.2 < abs(etaGroomed) <= 2.1")
-  etaPtBins.append("150 < ptGroomed <= 400 and abs(etaGroomed) > 2.1")
-  etaPtBins.append("400 < ptGroomed <= 600 and abs(etaGroomed)<= 1.2")
-  etaPtBins.append("400 < ptGroomed <= 600 and abs(etaGroomed) > 1.2")
-  etaPtBins.append("ptGroomed > 600 and abs(etaGroomed) <= 1.2")
-  etaPtBins.append("ptGroomed > 600 and abs(etaGroomed) > 1.2")
-  
+  # etaPtBins = []
+#   etaPtBins.append
+#   etaPtBins.append("15 < ptGroomed <= 40 and abs(etaGroomed) <= 1.2")
+#   etaPtBins.append("15 < ptGroomed <= 40 and 1.2 < abs(etaGroomed) <= 2.1")
+#   etaPtBins.append("15 < ptGroomed <= 40 and abs(etaGroomed) > 2.1")
+#   etaPtBins.append("40 < ptGroomed <= 60 and abs(etaGroomed) <= 1.2")
+#   etaPtBins.append("40 < ptGroomed <= 60 and 1.2 < abs(etaGroomed) <= 2.1")
+#   etaPtBins.append("40 < ptGroomed <= 60 and abs(etaGroomed) > 2.1")
+#   etaPtBins.append("60 < ptGroomed <= 90 and abs(etaGroomed) <= 1.2")
+#   etaPtBins.append("60 < ptGroomed <= 90 and 1.2 < abs(etaGroomed) <= 2.1")
+#   etaPtBins.append("60 < ptGroomed <= 90 and abs(etaGroomed) > 2.1")
+#   etaPtBins.append("90 < ptGroomed <= 150 and abs(etaGroomed) <= 1.2")
+#   etaPtBins.append("90 < ptGroomed <= 150 and 1.2 < abs(etaGroomed) <= 2.1")
+#   etaPtBins.append("90 < ptGroomed <= 150 and abs(etaGroomed) > 2.1")
+#   etaPtBins.append("150 < ptGroomed <= 400 and abs(etaGroomed) <= 1.2")
+#   etaPtBins.append("150 < ptGroomed <= 400 and 1.2 < abs(etaGroomed) <= 2.1")
+#   etaPtBins.append("150 < ptGroomed <= 400 and abs(etaGroomed) > 2.1")
+#   etaPtBins.append("400 < ptGroomed <= 600 and abs(etaGroomed)<= 1.2")
+#   etaPtBins.append("400 < ptGroomed <= 600 and abs(etaGroomed) > 1.2")
+#   etaPtBins.append("ptGroomed > 600 and abs(etaGroomed) <= 1.2")
+#   etaPtBins.append("ptGroomed > 600 and abs(etaGroomed) > 1.2")
+#
  #  # read in bias file
  #  print "Reading in bias file"
  #  biasDict = {}
@@ -212,7 +210,7 @@ def main():
       # processNtuple(inFileName, inDirName, histoDirName, outDirName, etaPtBins)
       # break
       # p.apply_async(processNtuple, args = (inFileName, inDirName, histoDirName, outDirName, etaPtBins, biasDict, flavourBias, NormDict))
-      p.apply_async(processNtuple, args = (inFileName, inDirName, histoDirName, outDirName, etaPtBins))
+      p.apply_async(processNtuple, args = (inFileName, inDirName, histoDirName, outDirName))
       
 
   p.close()

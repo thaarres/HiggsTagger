@@ -26,7 +26,7 @@ def processNtuple(inFileName, inDirName, outDirName,category):
   histo = TH2D("jets", "jets", 50, -2.5, 2.5, 40, 4.17438727, 6.95654544315); # pt starting from 15 and until 1000
   #mychain.Draw("log(ptGroomed+50):etaGroomed >> +jets", "", "Lego goff");
   mychain.Draw("log(ptGroomed+50):etaGroomed >> +jets", "", "Lego goff");   #after adding normalization and category weight branches
-  histo_lin = TH2D("jets_lin", "jets_lin", 50, -2.5, 2.5, 40, 15, 1000); # pt starting from 15 and until 1000  , default nbins was 40
+  histo_lin = TH2D("jets_lin", "jets_lin", 50, -2.5, 2.5, 100, 0., 1500.); # pt starting from 15 and until 1000  , default nbins was 40
   #mychain.Draw("ptGroomed:etaGroomed >> +jets_lin", "","Lego goff")
   mychain.Draw("ptGroomed:etaGroomed >> +jets_lin", "", "Lego goff")  # after adding normalization and category weight branches
 
@@ -45,8 +45,8 @@ def main():
   print "Using %i parallel processes" %parallelProcesses
   
   outDirName = '/shome/thaarres/HiggsTagger/EtaPtWeights'     # for individual category histograms
-  combDirName = '/shome/thaarres/HiggsTaggerEtaPtWeights'    # for combined histograms
-  inDirName = "/shome/thaarres/HiggsTagger/rootfiles"
+  combDirName = '/shome/thaarres/HiggsTagger/EtaPtWeights'    # for combined histograms
+  inDirName = "/shome/thaarres/HiggsTagger/rootfiles/signal"
   
   flavourCategoryDict = {}
 
