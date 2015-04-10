@@ -11,18 +11,25 @@ python tmva_training.py --file=outfilename
 Parser options:
 parser.add_option("-c", "--categories", dest="categories", default=False, action="store_true",
                               help="train in pt-eta categories")
+                              
 parser.add_option("-w", "--weight", dest="weight", default=False, action="store_true",
                               help="pt-eta reweight")
+                              
 parser.add_option("-g", "--gluonsplitting", dest="gluonsplitting", default=False, action="store_true",
                               help="train bb vs. gsp")
+                              
 parser.add_option("-C", "--charm", dest="charm", default=False, action="store_true",
                               help="train bb vs. charm") 
+                              
 parser.add_option("-p", "--usePT", dest="usePT", default=False, action="store_true",
                               help="use pT in training") 
+                              
 parser.add_option("-a", "--useALL", dest="useALL", default=False, action="store_true",
-                              help="use all signal samples in training")                       
+                              help="use all signal samples in training")                 
+                              
 parser.add_option("-f", "--file", dest="filename",
                   help="write to FILE", metavar="FILE")                      
+                  
 For instance:
 
 python tmva_training.py -c -w -g --file==BBvsGSPreweighted
