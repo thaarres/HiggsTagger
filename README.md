@@ -7,8 +7,11 @@ cd /swshare/ROOT/root_v5.34.18_slc6_amd64_py26_pythia6; export LD_LIBRARY_PATH=/
 Short description of the scripts:
 
 To run:
+
 python tmva_training.py --file=outfilename
+
 Parser options:
+
 parser.add_option("-c", "--categories", dest="categories", default=False, action="store_true",
                               help="train in pt-eta categories")
                               
@@ -43,8 +46,12 @@ readParallel()
 If you want to run parallell training processes you can edit and use the shell script runAll.sh (obs! Then readParallel() does not work, use read(inDirName, file))
 
 To create jet pt-eta weights and store as separate branch in training trees do:
+
 python createEtaPtWeightHists.py:
+
 This creates 2D histograms of pT versus eta for each sample. These are used to reweight each jet by 1/bin content of the bin the jet falls in. Same procedure as what was done for the CSV
+
 python addWeightBranch.py:
+
 adds a branch b_weight_etaPt to the training trees.
 
