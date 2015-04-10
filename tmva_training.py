@@ -8,8 +8,8 @@ import array
  
 training_vars_float = [
   "PFLepton_ratioRel",
-  "z_ratio",
-  "tau2IVF/tau1IVF",
+  "z_ratio1",
+  "tau_dot",
   "SV_mass_0",
   "SV_vtx_EnergyRatio_0",
   "SV_vtx_EnergyRatio_1",
@@ -46,7 +46,6 @@ training_vars_int = [
 
 argv = sys.argv
 parser = OptionParser()
-
 parser.add_option("-c", "--categories", dest="categories", default=False, action="store_true",
                               help="train in pt-eta categories")
 parser.add_option("-w", "--weight", dest="weight", default=False, action="store_true",
@@ -57,13 +56,16 @@ parser.add_option("-C", "--charm", dest="charm", default=False, action="store_tr
                               help="train bb vs. charm") 
 parser.add_option("-p", "--usePT", dest="usePT", default=False, action="store_true",
                               help="use pT in training") 
-                                                                                                                   			      			      			      			      
+parser.add_option("-a", "--useALL", dest="useALL", default=False, action="store_true",
+                              help="use all signal samples in training")                       
+parser.add_option("-f", "--file", dest="filename",
+                  help="write to FILE", metavar="FILE")                                                                                                                                                                               			      			      			      			      
 (opts, args) = parser.parse_args(argv)  
 
 def train(bdtoptions):
-  
-  outFile = ROOT.TFile('TMVA_unweighted_woPt.root', 'RECREATE')
-  print outFile
+
+  outFile = ROOT.TFile('TMVA_%s.root'%opts.filename, 'RECREATE')
+  print "Printing output to %s" %outFile.GetName()
 
   factory = ROOT.TMVA.Factory(
                                "TMVAClassification", 
@@ -78,7 +80,7 @@ def train(bdtoptions):
   
 ############ OLD LUMI-REWEIGHTING SCHEME!! DO NOT USE! Reweight before passing ############
 # files = [
-#     "weighted_rootfiles/QCD170-300_forTraining.root"  , "weighted_rootfiles/QCD300-470_forTraining.root"  ,"weighted_rootfiles/QCD470-600_forTraining.root","weighted_rootfiles/QCD600-800_forTraining.root","weighted_rootfiles/QCD800-1000_forTraining.root"  ,"weighted_rootfiles/QCD1000-1400_forTraining.root","weighted_rootfiles/QCD1400-1800_forTraining.root"
+#     "../weighted_rootfiles/QCD170-300_forTraining.root"  , "../weighted_rootfiles/QCD300-470_forTraining.root"  ,"../weighted_rootfiles/QCD470-600_forTraining.root","../weighted_rootfiles/QCD600-800_forTraining.root","../weighted_rootfiles/QCD800-1000_forTraining.root"  ,"../weighted_rootfiles/QCD1000-1400_forTraining.root","../weighted_rootfiles/QCD1400-1800_forTraining.root"
 #   ]
 #
 #   xSec = [12030.,
@@ -123,16 +125,24 @@ def train(bdtoptions):
  #  treeB.Add('QCD1000-1400_forTraining.root')
 
   
-  treeS.Add('weighted_rootfiles/r800_forTraining.root')
-  # treeS.Add('weighted_rootfiles/r1000_forTraining.root')
-#   treeS.Add('weighted_rootfiles/r1600_forTraining.root')
-#   treeS.Add('weighted_rootfiles/r2000_forTraining.root')
-  treeB.Add('weighted_rootfiles/qcd_forTraining.root')
   
-  signal_selection = 'massGroomed>80 && massGroomed<150' # bb
+  
+  if(opts.useALL):
+    treeS.Add('../weighted_rootfiles/rALL_forTraining.root')
+  else:
+    treeS.Add('../weighted_rootfiles/r800_forTraining.root')
+ 
+#     treeS.Add('../weighted_rootfiles/r1000_forTraining.root')
+#     treeS.Add('../weighted_rootfiles/r1600_forTraining.root')
+#     treeS.Add('../weighted_rootfiles/r2000_forTraining.root')
+
+  treeB.Add('../weighted_rootfiles/qcd_forTraining.root')
+  
+  signal_selection = '' # bb massGroomed>80 && massGroomed<150
   print "Signal selection = %s" %signal_selection
+  
   if(opts.gluonsplitting):
-    background_selection = 'massGroomed>80 && massGroomed<150 && abs(flavour==5) && nbHadrons>1' # gsp
+    background_selection = 'abs(flavour==5) && nbHadrons>1' #gsp massGroomed>80 && massGroomed<150 &&
   elif(opts.charm):
     background_selection = 'massGroomed>80 && massGroomed<150 && abs(flavour==4)' # charm
   else:
@@ -186,30 +196,34 @@ def train(bdtoptions):
   
   if (opts.categories):
     
+    
     if(opts.usePT):  
-      theCat1Vars = "PFLepton_ratioRel:z_ratio:tau2IVF/tau1IVF:SV_mass_0:SV_vtx_EnergyRatio_0:SV_vtx_EnergyRatio_1:SV_vtx_deltaR_0:PFLepton_IP2D:nSV:nSL:ptGroomed"
+      theCat1Vars = "PFLepton_ratioRel:z_ratio1:tau_dot:SV_mass_0:SV_vtx_EnergyRatio_0:SV_vtx_EnergyRatio_1:SV_vtx_deltaR_0:PFLepton_IP2D:nSV:nSL:ptGroomed"
     else:
-      theCat1Vars = "PFLepton_ratioRel:z_ratio:tau2IVF/tau1IVF:SV_mass_0:SV_vtx_EnergyRatio_0:SV_vtx_EnergyRatio_1:SV_vtx_deltaR_0:PFLepton_IP2D:nSV:nSL"
+      theCat1Vars = "PFLepton_ratioRel:z_ratio1:tau_dot:SV_mass_0:SV_vtx_EnergyRatio_0:SV_vtx_EnergyRatio_1:SV_vtx_deltaR_0:PFLepton_IP2D:nSV:nSL"
     # theCat1Vars =  "massGroomed:tau2/tau1:SV_flight2D_0:SV_flight2D_1:SV_flight2DErr_0:SV_flight2DErr_1:SV_totCharge_0:SV_totCharge_1:SV_mass_0:SV_mass_1:SV_vtx_pt_0:SV_vtx_pt_1:SV_vtx_EnergyRatio_0:SV_vtx_EnergyRatio_1:SV_vtx_deltaR_0:SV_vtx_deltaR_1:trackSip3dSig_3:trackPtRel_3:trackEtaRel_0:trackEtaRel_1:trackEtaRel_2:PFLepton_deltaR:PFLepton_ptrel:PFLepton_ratioRel:PFLepton_IP2D:nSV:SV_nTrk_0:SV_nTrk_1:jetNTracksEtaRel:nSL"
-    mcat = factory.BookMethod( ROOT.TMVA.Types.kCategory, "BDTCat4","" )  
-    cuts = [
-      'abs(etaGroomed)<=1.4 && ptGroomed < 400', 'abs(etaGroomed)<=1.4 && ptGroomed >= 400', 'abs(etaGroomed)>1.4 &&  ptGroomed <400', 'abs(etaGroomed)>1.4 && ptGroomed >= 400'
-    ]
+    # mcat = factory.BookMethod( ROOT.TMVA.Types.kCategory, "BDTCat4","" )
+    # cuts = [
+    #   'abs(etaGroomed)<=1.4 && ptGroomed < 400', 'abs(etaGroomed)<=1.4 && ptGroomed >= 400', 'abs(etaGroomed)>1.4 &&  ptGroomed <400', 'abs(etaGroomed)>1.4 && ptGroomed >= 400'
+    # ]
+    #
+    # for cut in cuts:
+    #   print "Training in category %s" %cut
+    #   mcat.AddMethod( ROOT.TCut(cut), theCat1Vars, ROOT.TMVA.Types.kBDT, "Category_BDT_4","!H:!V:NTrees=100:MinNodeSize=2.5%:BoostType=Grad:Shrinkage=0.10:UseBaggedBoost:BaggedSampleFraction=0.5:nCuts=20:MaxDepth=4" )
     
-    for cut in cuts:
-      print "Training in category %s" %cut                                               
-      mcat.AddMethod( ROOT.TCut(cut), theCat1Vars, ROOT.TMVA.Types.kBDT, "Category_BDT_4","!H:!V:NTrees=100:MinNodeSize=2.5%:BoostType=Grad:Shrinkage=0.10:UseBaggedBoost:BaggedSampleFraction=0.5:nCuts=20:MaxDepth=4" )
-    
-    mcat2 = factory.BookMethod( ROOT.TMVA.Types.kCategory, "BDTCat12","" )  
+    mcat2 = factory.BookMethod( ROOT.TMVA.Types.kCategory, "BDTCat8","" )  
     cuts2 = [
-      'abs(etaGroomed)<=1.2 && ptGroomed <400', 'abs(etaGroomed)<=1.2 && ptGroomed >= 400 && ptGroomed < 600', 'abs(etaGroomed)<=1.2 && ptGroomed >= 600 && ptGroomed < 800', 'abs(etaGroomed)<=1.2 && ptGroomed >= 800',
-      'abs(etaGroomed)>1.2 && abs(etaGroomed)<=2.1 && ptGroomed < 400', 'abs(etaGroomed)>1.2 && abs(etaGroomed)<=2.1 && ptGroomed >= 400 && ptGroomed < 600', 'abs(etaGroomed)>1.2 && abs(etaGroomed)<=2.1 && ptGroomed >= 600 && ptGroomed < 800', 'abs(etaGroomed)>1.2 && abs(etaGroomed)<=2.1 && ptGroomed >= 800',
-      'abs(etaGroomed)>2.1 && ptGroomed <400', 'abs(etaGroomed)>2.1 && ptGroomed >= 400 && ptGroomed < 600', 'abs(etaGroomed)>2.1 && ptGroomed >= 600 && ptGroomed < 800','abs(etaGroomed)>2.1 && ptGroomed > 800'
+      'abs(etaGroomed)<=1.4 && ptGroomed <450', 'abs(etaGroomed)<=1.4 && ptGroomed >= 450 && ptGroomed < 600', 'abs(etaGroomed)<=1.4 && ptGroomed >= 600 && ptGroomed < 800', 'abs(etaGroomed)<=1.4 && ptGroomed >= 800',
+      'abs(etaGroomed)>1.4 && ptGroomed <450', 'abs(etaGroomed)>1.4 && ptGroomed >= 450 && ptGroomed < 600', 'abs(etaGroomed)>1.4 && ptGroomed >= 600 && ptGroomed < 800', 'abs(etaGroomed)>1.4 && ptGroomed >= 800'
+    
+      # 'abs(etaGroomed)<=1.2 && ptGroomed <400', 'abs(etaGroomed)<=1.2 && ptGroomed >= 400 && ptGroomed < 600', 'abs(etaGroomed)<=1.2 && ptGroomed >= 600 && ptGroomed < 800', 'abs(etaGroomed)<=1.2 && ptGroomed >= 800',
+      # 'abs(etaGroomed)>1.2 && abs(etaGroomed)<=2.1 && ptGroomed < 400', 'abs(etaGroomed)>1.2 && abs(etaGroomed)<=2.1 && ptGroomed >= 400 && ptGroomed < 600', 'abs(etaGroomed)>1.2 && abs(etaGroomed)<=2.1 && ptGroomed >= 600 && ptGroomed < 800', 'abs(etaGroomed)>1.2 && abs(etaGroomed)<=2.1 && ptGroomed >= 800',
+      # 'abs(etaGroomed)>2.1 && ptGroomed <400', 'abs(etaGroomed)>2.1 && ptGroomed >= 400 && ptGroomed < 600', 'abs(etaGroomed)>2.1 && ptGroomed >= 600 && ptGroomed < 800','abs(etaGroomed)>2.1 && ptGroomed > 800'
     ]
  
     for cut in cuts2:
       print "Training in category %s" %cut
-      mcat2.AddMethod( ROOT.TCut(cut), theCat1Vars, ROOT.TMVA.Types.kBDT, "Category_BDT_12","!H:!V:NTrees=100:MinNodeSize=2.5%:BoostType=Grad:Shrinkage=0.10:UseBaggedBoost:BaggedSampleFraction=0.5:nCuts=20:MaxDepth=4" )
+      mcat2.AddMethod( ROOT.TCut(cut), theCat1Vars, ROOT.TMVA.Types.kBDT, "Category_BDT_8","!H:!V:NTrees=100:MinNodeSize=2.5%:BoostType=Grad:Shrinkage=0.10:UseBaggedBoost:BaggedSampleFraction=0.5:nCuts=20:MaxDepth=4" )
   
   
   # (ROOT.TMVA.gConfig().GetVariablePlotting()).fMaxNumOfAllowedVariablesForScatterPlots = 2
@@ -230,14 +244,12 @@ def train(bdtoptions):
 def read(inDirName, inFileName):
   print "Reading", inFileName
   print "################################"
-  print "inFileName is", inFileName
 
   TMVA_tools = ROOT.TMVA.Tools.Instance()
 
   tree = ROOT.TChain('Fjets')
   tree.Add('%s%s' %(inDirName,inFileName))
   print '%s%s' %(inDirName,inFileName)
-  print "tree is", tree
   print "################################"
   print "################################"
   print "################################"
@@ -247,13 +259,16 @@ def read(inDirName, inFileName):
   ptGroomed = array.array('f',[0])
   flavour = array.array('f',[0])
   nbHadrons = array.array('f',[0])
-  reader.AddSpectator("etaGroomed",etaGroomed)
-  reader.AddSpectator("flavour",flavour)
-  reader.AddSpectator("nbHadrons",nbHadrons)
-  factory.AddSpectator("massGroomed")
-  if not opts.usePT:
-    reader.AddSpectator("ptGroomed",ptGroomed)
+  massGroomed = array.array('f',[0])
+  
+  
 
+  reader.AddSpectator("massGroomed", massGroomed)
+  reader.AddSpectator("etaGroomed", etaGroomed)
+  reader.AddSpectator("flavour", flavour)
+  reader.AddSpectator("nbHadrons", nbHadrons)
+  if not opts.usePT:
+    reader.AddSpectator("ptGroomed", ptGroomed)
   varDict = {}
   for var in training_vars_float:
     varDict[var] = array.array('f',[0])
@@ -261,39 +276,54 @@ def read(inDirName, inFileName):
   for var in training_vars_int:
     varDict[var] = array.array('f',[0])
     reader.AddVariable(var, varDict[var])
+    
   if(opts.usePT):
     reader.AddVariable("ptGroomed",ptGroomed)
-  
- 
+
+
   
   reader.BookMVA("BDTG","weights/TMVAClassification_BDTG.weights.xml")
+  # reader.BookMVA("BDTCat4","weights/TMVAClassification_BDTCat4.weights.xml")
+  reader.BookMVA("BDTCat8","weights/TMVAClassification_BDTCat8.weights.xml")
 
   bdtOuts = []
+  # bdtOutsCat4 = []
+  bdtOutsCat8 = []
   flavours = []
   ptGroomeds = []
   etaGroomeds = []
+  massGroomeds = []
+  
+  hBDTGDisc = ROOT.TH1F("hBDTGDisc","",1000,-5,5)
+  hBDTCat8Disc = ROOT.TH1F("hBDTCat8Disc","",1000,-5,5)
+  
 
   for jentry in xrange(tree.GetEntries()):
 
     ientry = tree.LoadTree(jentry)
     nb = tree.GetEntry(jentry)
 
-
-    # for var in varDict:
-#       print "var = ", var
-#       varDict[var][0] = getattr(tree, var)
-
-    # print "varDict[var][0] is", varDict[var][0]
- #    print "################################"
- #    print "################################"
- #    print "################################"
+    for var in varDict:
+      if var.find("tau2IVF/tau1IVF") != -1:
+        varDict[var][0] = getattr(tree, "tau2IVF")
+        varDict[var][0] /= getattr(tree, "tau1IVF")
+      else:
+        varDict[var][0] = getattr(tree, var)
 
     bdtOutput = reader.EvaluateMVA("BDTG")
+    # bdtOutputCat4 = reader.EvaluateMVA("BDTCat4")
+    bdtOutputCat8 = reader.EvaluateMVA("BDTCat8")
     flavour = tree.flavour
     bdtOuts.append(bdtOutput)
+    # bdtOutsCat4.append(bdtOutputCat4)
+    bdtOutsCat8.append(bdtOutputCat8)
     flavours.append(flavour)
     ptGroomeds.append(tree.ptGroomed)
     etaGroomeds.append(tree.etaGroomed)
+    massGroomeds.append(tree.massGroomed)
+    
+    hBDTGDisc.Fill(bdtOutput)
+    hBDTCat8Disc.Fill(bdtOutputCat8)
 
     if jentry%10000 == 0:
       print jentry, bdtOutput, flavour
@@ -304,30 +334,44 @@ def read(inDirName, inFileName):
     print "Writing small tree"
 
     BDTG = array.array('f',[0])
+    # BDTCat4 = array.array('f',[0])
+    BDTCat8 = array.array('f',[0])
     flav = array.array('f',[0])
+    etaGroomed = array.array('f',[0])
+    ptGroomed = array.array('f',[0])  
+    massGroomed = array.array('f',[0])
 
-    jetPt = array.array('f',[0])
-    jetEta = array.array('f',[0])
-
-    fout = ROOT.TFile('trainPlusBDTG_%s.root'%(inFileName.replace(".root","")), 'RECREATE')
+    fout = ROOT.TFile('validation_%s.root'%(inFileName.replace(".root","")), 'RECREATE')
     outTree = ROOT.TTree( 'tree', 'b-tagging training tree' )
     outTree.Branch('BDTG', BDTG, 'BDTG/F')
+    # outTree.Branch('BDTCat4', BDTCat4, 'BDTCat4/F')
+    outTree.Branch('BDTCat8', BDTCat8, 'BDTCat8/F')
     outTree.Branch('flavour', flav, 'flavour/F')
-    if(opts.usePT):
-      outTree.Branch('ptGroomed', ptGroomed, 'ptGroomed/F')
     outTree.Branch('etaGroomed', etaGroomed, 'etaGroomed/F')
+    outTree.Branch('ptGroomed', ptGroomed, 'ptGroomed/F')
+    outTree.Branch('massGroomed', massGroomed, 'massGroomed/F')
 
 
     for i in range(len((bdtOuts))):
       BDTG[0] = bdtOuts[i]
+      # BDTCat4[0] = bdtOutsCat4[i]
+      BDTCat8[0] = bdtOutsCat8[i]
       flav[0] = flavours[i]
-      ptGroomed[0] = ptGroomeds[i]
       etaGroomed[0] = etaGroomeds[i]
+      ptGroomed[0] = ptGroomeds[i]
+      massGroomed[0] = massGroomeds[i]
       if i%10000==0:
         print i, bdtOuts[i], flavours[i]
+        # print i, bdtOutsCat4[i], flavours[i]
+        print i, bdtOutsCat8[i], flavours[i]
       outTree.Fill()
+      
       # treeout.Write()
     fout.Write()
+    hBDTGDisc.Write()
+    hBDTCat8Disc.Write()
+    del hBDTGDisc
+    del hBDTCat8Disc
     fout.Close()
   print "done", inFileName
 
@@ -339,20 +383,24 @@ def readParallel():
 
   inDirName="/shome/thaarres/HiggsTagger/weighted_rootfiles/"
   files = [
-    'R800_forTraining.root',
-#     'QCD1000-1400_forTraining.root',
-#     'QCD120-170_forTraining.root',
-#     'QCD1400-1800_forTraining.root',
-#     'QCD170-300_forTraining.root',
-#     'QCD300-470_forTraining.root',
-#     'QCD470-600_forTraining.root',
-#     'QCD600-800_forTraining.root',
-#     'QCD800-1000_forTraining.root',
+    'qcd_forTraining.root',
+#     'r1000_forTraining.root',
+#     'r1600_forTraining.root',
+    'r2000_forTraining.root',
+    'r800_forTraining.root',
+# #     'QCD1000-1400_forTraining.root',
+# #     'QCD120-170_forTraining.root',
+# #     'QCD1400-1800_forTraining.root',
+# #     'QCD170-300_forTraining.root',
+# #     'QCD300-470_forTraining.root',
+# #     'QCD470-600_forTraining.root',
+# #     'QCD600-800_forTraining.root',
+# #     'QCD800-1000_forTraining.root',
     ]
   
-  for inFileName in os.listdir(inDirName):
-   if inFileName.endswith(".root"):
-     files.append(inFileName)
+  # for inFileName in os.listdir(inDirName):
+  #  if inFileName.endswith(".root"):
+  #    files.append(inFileName)
 
   # create Pool
   p = multiprocessing.Pool(parallelProcesses)
@@ -384,7 +432,14 @@ if __name__ == '__main__':
                                  "MaxDepth=4",
                                ]
     train(bdtoptions)
-    read("/shome/thaarres/HiggsTagger/rootfiles/signal/", "r1000_forTraining.root")
+    # read("/shome/thaarres/HiggsTagger/rootfiles/", "r800_forTraining.root")
     # trainMultiClass()
-    # readParallel()
+    inDirName="/shome/thaarres/HiggsTagger/weighted_rootfiles/"
+    files = ['qcd_forTraining.root',
+        'r2000_forTraining.root',
+        'r800_forTraining.root'
+        ]
+    for f in files:
+#      read(inDirName, f)
+# readParallel()
 

@@ -15,11 +15,14 @@ gStyle.SetPadLeftMargin(0.20)   # Left margin of the pads on the canvas.
 gStyle.SetPadBottomMargin(0.20) # Bottom margin of the pads on the canvas.
 gStyle.SetFrameFillStyle(0) # Keep the fill color of our pads white.
 
-f = ROOT.TFile('tmp_reweighted_r800/TMVA_reweighted_r800.root', 'read') 
-mytree=f.Get('TrainTree') 
-nentry = mytree.GetEntries() 
+inDirName="/shome/thaarres/HiggsTagger/"
+files = []
+  
+for inFileName in os.listdir(inDirName):
+  if inFileName.beginswith("validation_"):
+     files.append(inFileName)
 
-l = ROOT.TLegend(0.61,0.59,0.82,0.8)
+l = ROOT.TLegend(0.61,0.59,0.82,0.8,"","NDC")
 l.SetLineWidth(2)
 l.SetBorderSize(0)
 l.SetFillColor(0)
@@ -34,6 +37,7 @@ histos = []
 for j in range(0,12):
   hname = "histos_%d" % (j) # Each histogram must have a unique name
   htitle = "Histogram %d" % (j) # Give each its own title.
+  htitle = "Histogram %s" %(inFileName.replace(".root",""))
   if (j == 0):
     htitle = "Background"
     histos.append( TH1F(hname, htitle, 800, 300., 1500.) )
@@ -85,38 +89,41 @@ histos[3].SetLineColor(3)
 # histos[4].SetFillColor(1)
 # histos[5].SetFillColor(1)
 
-if(f.GetName().find("reweighted") != -1):
-  cutBDTCat8 = -0.001165
-  cutBDTG = 0.140891
-elif(f.GetName().find("unweighted") != -1):
-  cutBDTCat8 = 0.034502
-  cutBDTG = 0.146482 
+for f in files:
+  mytree=f.Get('TrainTree') 
+  nentry = mytree.GetEntries()
   
-print f.GetName()  
-print cutBDTG
-print cutBDTCat8
+  if(f.GetName().find("reweighted") != -1):
+    cutBDTCat4 = -0.035950
+    cutBDTCat12 = -0.058187
+    cutBDTG = -0.003619
+  elif(f.GetName().find("unweighted") != -1):
+    cutBDTCat4 = -0.160858
+    cutBDTCat12 = -0.174253
+    cutBDTG = -0.016775 
   
-for event in mytree:
-  ptEtaWeight = event.weight
-  # ptEtaWeight = 1.
-  if event.classID==1:
-    # histos[0].Fill( event.ptGroomed, event.weight )
+  print f.GetName()  
+  print cutBDTCat4
+  print cutBDTCat12
+  print cutBDTG
+  
+  for event in mytree:
     histos[1].Fill( event.ptGroomed )
-    # histos[2].Fill( event.ptGroomed, event.etaGroomed, ptEtaWeight )
-    if(event.BDTCat8>= cutBDTCat8):
-        histos[10].Fill( event.ptGroomed )
+    if(event.BDTCat4>= cutBDTCat4):
+      histos[9].Fill( event.ptGroomed )
+    if(event.BDTCat12>= cutBDTCat12):
+      histos[10].Fill( event.ptGroomed )
     if(event.BDTG>= cutBDTG):
       histos[11].Fill( event.ptGroomed )
-  if event.classID==0:
-    # histos[3].Fill( event.ptGroomed, event.weight )
-    histos[4].Fill( event.ptGroomed )
-    # histos[5].Fill( event.ptGroomed, event.etaGroomed, ptEtaWeight )
-    # if(event.BDTCat4>= cutBDTCat4):
-    #    histos[7].Fill( event.ptGroomed )
-    if(event.BDTCat8>= cutBDTCat8):
-        histos[8].Fill( event.ptGroomed )
-    if(event.BDTG>= cutBDTG):
-      histos[6].Fill( event.ptGroomed )
+    if event.classID==0:
+
+      histos[4].Fill( event.ptGroomed )
+      if(event.BDTCat4>= cutBDTCat4):
+        histos[7].Fill( event.ptGroomed )
+      if(event.BDTCat12>= cutBDTCat12):
+          histos[8].Fill( event.ptGroomed )
+      if(event.BDTG>= cutBDTG):
+        histos[6].Fill( event.ptGroomed )
     
 # for i in range(0,1):
 #   for j in range(0,6):
@@ -139,32 +146,32 @@ t.SetTextAlign(12)
 t.SetTextSize(0.04)
 
    
-# can[0].cd(1)
-# histos[0].Draw("HIST")
-# histos[1].Draw("HISTsame")
-# l.Draw()
+can[0].cd(1)        
+histos[0].Draw("HIST")   
+histos[1].Draw("HISTsame")
+l.Draw()
+t.DrawLatex(.5,.4,"QCD")
+t.DrawLatex(.5,.35,"80 GeV < M_{j} < 150 GeV")
+gPad.Update()
+can[0].cd(2)
+histos[4].Draw("HIST")   
+histos[3].Draw("HISTsame")
+l.Draw()
+t.DrawLatex(.5,.4,"R(M800)")
+t.DrawLatex(.5,.35,"80 GeV < M_{j} < 150 GeV")
+gPad.Update()
+can[1].cd(1)
+histos[5].Draw("LEGO1")  
 # t.DrawLatex(.5,.4,"QCD")
 # t.DrawLatex(.5,.35,"80 GeV < M_{j} < 150 GeV")
-# gPad.Update()
-# can[0].cd(2)
-# histos[4].Draw("HIST")
-# histos[3].Draw("HISTsame")
-# l.Draw()
+gPad.Update()
+can[1].cd(2)
+histos[2].Draw("LEGO1")   
 # t.DrawLatex(.5,.4,"R(M800)")
 # t.DrawLatex(.5,.35,"80 GeV < M_{j} < 150 GeV")
-# gPad.Update()
-# can[1].cd(1)
-# histos[5].Draw("LEGO1")
-# # t.DrawLatex(.5,.4,"QCD")
-# # t.DrawLatex(.5,.35,"80 GeV < M_{j} < 150 GeV")
-# gPad.Update()
-# can[1].cd(2)
-# histos[2].Draw("LEGO1")
-# # t.DrawLatex(.5,.4,"R(M800)")
-# # t.DrawLatex(.5,.35,"80 GeV < M_{j} < 150 GeV")
-# gPad.Update()
+gPad.Update()
 
-histos[8].Rebin(10)
+
 histos[6].Rebin(10)
 histos[4].Rebin(10)
 EffVsPt = ROOT.TGraphAsymmErrors() 
@@ -179,35 +186,36 @@ EffVsPt.GetHistogram().SetMinimum(0.)
 EffVsPt.SetMarkerStyle(20) 
 EffVsPt.SetMarkerColor(46) 
 
-# histos[7].Rebin(10)
-# histos[8].Rebin(10)
-# EffVsPtCat4 = ROOT.TGraphAsymmErrors()
-# EffVsPtCat4.Divide(histos[7],histos[4],"cl=0.683 b(1,1) mode")
-# EffVsPtCat4.SetTitle("")
-# EffVsPtCat4.GetXaxis().SetTitle("p_{T} [GeV]")
-# EffVsPtCat4.GetXaxis().SetLimits(300.,1500.)
-# EffVsPtCat4.GetYaxis().SetTitle("Efficiency")
-# EffVsPtCat4.GetYaxis().SetTitleOffset(1.16)
-# EffVsPtCat4.GetHistogram().SetMaximum(1.1)
-# EffVsPtCat4.GetHistogram().SetMinimum(0.)
-# EffVsPtCat4.SetMarkerStyle(20)
-# EffVsPtCat4.SetMarkerColor(3)
+histos[7].Rebin(10)
+histos[8].Rebin(10)
+EffVsPtCat4 = ROOT.TGraphAsymmErrors()
+EffVsPtCat4.Divide(histos[7],histos[4],"cl=0.683 b(1,1) mode")
+EffVsPtCat4.SetTitle("")
+EffVsPtCat4.GetXaxis().SetTitle("p_{T} [GeV]")
+EffVsPtCat4.GetXaxis().SetLimits(300.,1500.)
+EffVsPtCat4.GetYaxis().SetTitle("Efficiency")
+EffVsPtCat4.GetYaxis().SetTitleOffset(1.16)
+EffVsPtCat4.GetHistogram().SetMaximum(1.1)
+EffVsPtCat4.GetHistogram().SetMinimum(0.)
+EffVsPtCat4.SetMarkerStyle(20)
+EffVsPtCat4.SetMarkerColor(3)
 
-EffVsPtCat8 = ROOT.TGraphAsymmErrors()
-EffVsPtCat8.Divide(histos[8],histos[4],"cl=0.683 b(1,1) mode")
-EffVsPtCat8.SetTitle("")
-EffVsPtCat8.GetXaxis().SetTitle("p_{T} [GeV]")
-EffVsPtCat8.GetXaxis().SetLimits(300.,1500.)
-EffVsPtCat8.GetYaxis().SetTitle("Efficiency")
-EffVsPtCat8.GetYaxis().SetTitleOffset(1.16)
-EffVsPtCat8.GetHistogram().SetMaximum(1.1)
-EffVsPtCat8.GetHistogram().SetMinimum(0.)
-EffVsPtCat8.SetMarkerStyle(20)
-EffVsPtCat8.SetMarkerColor(4)
+EffVsPtCat12 = ROOT.TGraphAsymmErrors()
+EffVsPtCat12.Divide(histos[8],histos[4],"cl=0.683 b(1,1) mode")
+EffVsPtCat12.SetTitle("")
+EffVsPtCat12.GetXaxis().SetTitle("p_{T} [GeV]")
+EffVsPtCat12.GetXaxis().SetLimits(300.,1500.)
+EffVsPtCat12.GetYaxis().SetTitle("Efficiency")
+EffVsPtCat12.GetYaxis().SetTitleOffset(1.16)
+EffVsPtCat12.GetHistogram().SetMaximum(1.1)
+EffVsPtCat12.GetHistogram().SetMinimum(0.)
+EffVsPtCat12.SetMarkerStyle(20)
+EffVsPtCat12.SetMarkerColor(4)
 
 can[2].cd(1)
 EffVsPt.Draw("AP")
-EffVsPtCat8.Draw("Psame")
+EffVsPtCat4.Draw("Psame")
+EffVsPtCat12.Draw("Psame")
 t.DrawLatex(.32,.4,"R(M800)")
 # t.DrawLatex(.22,.35,"p_{T}-#eta reweighted")
 
@@ -219,14 +227,14 @@ l.SetTextFont(42)
 l.SetTextSize(0.04)
 l.SetTextAlign(12)
 l.AddEntry(EffVsPt,"BDT",'p')
-l.AddEntry(EffVsPtCat8,"BDTCat8",'p')
+l.AddEntry(EffVsPtCat4,"BDTCat4",'p')
+l.AddEntry(EffVsPtCat12,"BDTCat12",'p')
 l.Draw()
 gPad.Update()
 
 
 can[2].cd(2)
 histos[11].Rebin(10)
-histos[10].Rebin(10)
 histos[1].Rebin(10)
 bkg_EffVsPt = ROOT.TGraphAsymmErrors() 
 bkg_EffVsPt.Divide(histos[11],histos[1],"cl=0.683 b(1,1) mode") 
@@ -240,20 +248,35 @@ bkg_EffVsPt.GetHistogram().SetMinimum(0.)
 bkg_EffVsPt.SetMarkerStyle(20) 
 bkg_EffVsPt.SetMarkerColor(46) 
 
-bkg_EffVsPtCat8 = ROOT.TGraphAsymmErrors()
-bkg_EffVsPtCat8.Divide(histos[10],histos[1],"cl=0.683 b(1,1) mode")
-bkg_EffVsPtCat8.SetTitle("")
-bkg_EffVsPtCat8.GetXaxis().SetTitle("p_{T} [GeV]")
-bkg_EffVsPtCat8.GetXaxis().SetLimits(300.,1500.)
-bkg_EffVsPtCat8.GetYaxis().SetTitle("Efficiency")
-bkg_EffVsPtCat8.GetYaxis().SetTitleOffset(1.16)
-bkg_EffVsPtCat8.GetHistogram().SetMaximum(1.1)
-bkg_EffVsPtCat8.GetHistogram().SetMinimum(0.)
-bkg_EffVsPtCat8.SetMarkerStyle(20)
-bkg_EffVsPtCat8.SetMarkerColor(4)
+histos[9].Rebin(10)
+histos[10].Rebin(10)
+bkg_EffVsPtCat4 = ROOT.TGraphAsymmErrors()
+bkg_EffVsPtCat4.Divide(histos[9],histos[1],"cl=0.683 b(1,1) mode")
+bkg_EffVsPtCat4.SetTitle("")
+bkg_EffVsPtCat4.GetXaxis().SetTitle("p_{T} [GeV]")
+bkg_EffVsPtCat4.GetXaxis().SetLimits(300.,1500.)
+bkg_EffVsPtCat4.GetYaxis().SetTitle("Efficiency")
+bkg_EffVsPtCat4.GetYaxis().SetTitleOffset(1.16)
+bkg_EffVsPtCat4.GetHistogram().SetMaximum(1.1)
+bkg_EffVsPtCat4.GetHistogram().SetMinimum(0.)
+bkg_EffVsPtCat4.SetMarkerStyle(20)
+bkg_EffVsPtCat4.SetMarkerColor(3)
+
+bkg_EffVsPtCat12 = ROOT.TGraphAsymmErrors()
+bkg_EffVsPtCat12.Divide(histos[10],histos[1],"cl=0.683 b(1,1) mode")
+bkg_EffVsPtCat12.SetTitle("")
+bkg_EffVsPtCat12.GetXaxis().SetTitle("p_{T} [GeV]")
+bkg_EffVsPtCat12.GetXaxis().SetLimits(300.,1500.)
+bkg_EffVsPtCat12.GetYaxis().SetTitle("Efficiency")
+bkg_EffVsPtCat12.GetYaxis().SetTitleOffset(1.16)
+bkg_EffVsPtCat12.GetHistogram().SetMaximum(1.1)
+bkg_EffVsPtCat12.GetHistogram().SetMinimum(0.)
+bkg_EffVsPtCat12.SetMarkerStyle(20)
+bkg_EffVsPtCat12.SetMarkerColor(4)
 
 bkg_EffVsPt.Draw("AP")
-bkg_EffVsPtCat8.Draw("Psame")
+bkg_EffVsPtCat4.Draw("Psame")
+bkg_EffVsPtCat12.Draw("Psame")
 t.DrawLatex(.32,.4,"QCD")
 l.Draw()
 gPad.Update()
