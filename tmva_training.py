@@ -178,11 +178,10 @@ def train(bdtoptions):
   
   if (opts.categories):
     
-    
     if(opts.usePT):  
-      theCat1Vars = "PFLepton_ratioRel:z_ratio1:tau_dot:SV_mass_0:SV_vtx_EnergyRatio_0:SV_vtx_EnergyRatio_1:SV_vtx_deltaR_0:PFLepton_IP2D:nSV:nSL:ptGroomed"
+      theCat1Vars = "PFLepton_ptrel:z_ratio:tau_dot:SV_mass_0:SV_vtx_EnergyRatio_0:SV_vtx_EnergyRatio_1:PFLepton_IP2D:tau2/tau1:nSV:nSL:ptGroomed"
     else:
-      theCat1Vars = "PFLepton_ratioRel:z_ratio1:tau_dot:SV_mass_0:SV_vtx_EnergyRatio_0:SV_vtx_EnergyRatio_1:SV_vtx_deltaR_0:PFLepton_IP2D:nSV:nSL"
+      theCat1Vars = "PFLepton_ptrel:z_ratio:tau_dot:SV_mass_0:SV_vtx_EnergyRatio_0:SV_vtx_EnergyRatio_1:PFLepton_IP2D:tau2/tau1:nSV:nSL"
     # theCat1Vars =  "massGroomed:tau2/tau1:SV_flight2D_0:SV_flight2D_1:SV_flight2DErr_0:SV_flight2DErr_1:SV_totCharge_0:SV_totCharge_1:SV_mass_0:SV_mass_1:SV_vtx_pt_0:SV_vtx_pt_1:SV_vtx_EnergyRatio_0:SV_vtx_EnergyRatio_1:SV_vtx_deltaR_0:SV_vtx_deltaR_1:trackSip3dSig_3:trackPtRel_3:trackEtaRel_0:trackEtaRel_1:trackEtaRel_2:PFLepton_deltaR:PFLepton_ptrel:PFLepton_ratioRel:PFLepton_IP2D:nSV:SV_nTrk_0:SV_nTrk_1:jetNTracksEtaRel:nSL"
     # mcat = factory.BookMethod( ROOT.TMVA.Types.kCategory, "BDTCat4","" )
     # cuts = [
@@ -290,7 +289,7 @@ def read(inDirName, inFileName):
         varDict[var][0] /= getattr(tree, "tau1")
       else:
         varDict[var][0] = getattr(tree, var)
-
+    
     bdtOutput = reader.EvaluateMVA("BDTG")
     # bdtOutputCat4 = reader.EvaluateMVA("BDTCat4")
     bdtOutputCat8 = reader.EvaluateMVA("BDTCat8")
@@ -424,6 +423,7 @@ if __name__ == '__main__':
         'r2000_forTraining.root',
         'r800_forTraining.root'
         ]
+    files = [ "rAll_forTraining.root"]
     for f in files:
       read(inDirName, f)
 # readParallel()
