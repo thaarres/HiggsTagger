@@ -7,33 +7,14 @@ import multiprocessing
 import array
  
 training_vars_float = [
-  "PFLepton_ratioRel",
-  "z_ratio1",
+  "PFLepton_ptrel",
+  "z_ratio",
   "tau_dot",
   "SV_mass_0",
   "SV_vtx_EnergyRatio_0",
   "SV_vtx_EnergyRatio_1",
-  "SV_vtx_deltaR_0", 
-  "PFLepton_IP2D"
-  # "massGroomed",
-#   "tau2/tau1",
-#   "SV_flight2D_0",
-#   "SV_flight2D_1",
-#   "SV_flight2DErr_0",
-#   "SV_flight2DErr_1",
-#   "SV_totCharge_0",
-#   "SV_totCharge_1",
-#  "SV_mass_1",
-#  "SV_vtx_pt_0",
-#  "SV_vtx_pt_1",
-#  "SV_vtx_deltaR_1",
-#  "trackSip3dSig_3",
-#  "trackPtRel_3",
-#  "trackEtaRel_0",
-#  "trackEtaRel_1",
-#  "trackEtaRel_2",
-#  "PFLepton_deltaR",
-#  "PFLepton_ptrel",
+  "PFLepton_IP2D", 
+  "tau2/tau1"
   ]
  
 training_vars_int = [
@@ -166,12 +147,13 @@ def train(bdtoptions):
     factory.AddVariable("ptGroomed", 'F')
     
   factory.AddSpectator("massGroomed")
-  factory.AddSpectator("etaGroomed")
   factory.AddSpectator("flavour")
   factory.AddSpectator("nbHadrons")
   
   if not opts.usePT: 
      factory.AddSpectator("ptGroomed")
+  
+  factory.AddSpectator("etaGroomed")
     
   if (opts.weight):
     # factory.AddSpectator("weight_etaPt")
@@ -260,15 +242,13 @@ def read(inDirName, inFileName):
   flavour = array.array('f',[0])
   nbHadrons = array.array('f',[0])
   massGroomed = array.array('f',[0])
-  
-  
 
   reader.AddSpectator("massGroomed", massGroomed)
-  reader.AddSpectator("etaGroomed", etaGroomed)
   reader.AddSpectator("flavour", flavour)
   reader.AddSpectator("nbHadrons", nbHadrons)
   if not opts.usePT:
     reader.AddSpectator("ptGroomed", ptGroomed)
+  reader.AddSpectator("etaGroomed", etaGroomed)
   varDict = {}
   for var in training_vars_float:
     varDict[var] = array.array('f',[0])
@@ -282,14 +262,15 @@ def read(inDirName, inFileName):
 
 
   
-  reader.BookMVA("BDTG","weights/TMVAClassification_BDTG.weights.xml")
+  reader.BookMVA("BDTG","new/weights/TMVAClassification_BDTG.weights.xml")
   # reader.BookMVA("BDTCat4","weights/TMVAClassification_BDTCat4.weights.xml")
-  reader.BookMVA("BDTCat8","weights/TMVAClassification_BDTCat8.weights.xml")
+  reader.BookMVA("BDTCat8","new/weights/TMVAClassification_BDTCat8.weights.xml")
 
   bdtOuts = []
   # bdtOutsCat4 = []
   bdtOutsCat8 = []
   flavours = []
+  nbHads = []
   ptGroomeds = []
   etaGroomeds = []
   massGroomeds = []
@@ -304,9 +285,9 @@ def read(inDirName, inFileName):
     nb = tree.GetEntry(jentry)
 
     for var in varDict:
-      if var.find("tau2IVF/tau1IVF") != -1:
-        varDict[var][0] = getattr(tree, "tau2IVF")
-        varDict[var][0] /= getattr(tree, "tau1IVF")
+      if var.find("tau2/tau1") != -1:
+        varDict[var][0] = getattr(tree, "tau2")
+        varDict[var][0] /= getattr(tree, "tau1")
       else:
         varDict[var][0] = getattr(tree, var)
 
@@ -318,6 +299,7 @@ def read(inDirName, inFileName):
     # bdtOutsCat4.append(bdtOutputCat4)
     bdtOutsCat8.append(bdtOutputCat8)
     flavours.append(flavour)
+    nbHads.append(tree.nbHadrons)
     ptGroomeds.append(tree.ptGroomed)
     etaGroomeds.append(tree.etaGroomed)
     massGroomeds.append(tree.massGroomed)
@@ -337,6 +319,7 @@ def read(inDirName, inFileName):
     # BDTCat4 = array.array('f',[0])
     BDTCat8 = array.array('f',[0])
     flav = array.array('f',[0])
+    nbHad = array.array('f',[0])
     etaGroomed = array.array('f',[0])
     ptGroomed = array.array('f',[0])  
     massGroomed = array.array('f',[0])
@@ -347,6 +330,7 @@ def read(inDirName, inFileName):
     # outTree.Branch('BDTCat4', BDTCat4, 'BDTCat4/F')
     outTree.Branch('BDTCat8', BDTCat8, 'BDTCat8/F')
     outTree.Branch('flavour', flav, 'flavour/F')
+    outTree.Branch('nbHadrons', nbHad, 'nbHadrons/F')
     outTree.Branch('etaGroomed', etaGroomed, 'etaGroomed/F')
     outTree.Branch('ptGroomed', ptGroomed, 'ptGroomed/F')
     outTree.Branch('massGroomed', massGroomed, 'massGroomed/F')
@@ -357,6 +341,7 @@ def read(inDirName, inFileName):
       # BDTCat4[0] = bdtOutsCat4[i]
       BDTCat8[0] = bdtOutsCat8[i]
       flav[0] = flavours[i]
+      nbHad[0] = nbHads[i]
       etaGroomed[0] = etaGroomeds[i]
       ptGroomed[0] = ptGroomeds[i]
       massGroomed[0] = massGroomeds[i]
@@ -383,11 +368,11 @@ def readParallel():
 
   inDirName="/shome/thaarres/HiggsTagger/weighted_rootfiles/"
   files = [
-    'qcd_forTraining.root',
+    'new/qcd_forTraining.root',
 #     'r1000_forTraining.root',
 #     'r1600_forTraining.root',
-    'r2000_forTraining.root',
-    'r800_forTraining.root',
+    'new/r2000_forTraining.root',
+    'new/r800_forTraining.root',
 # #     'QCD1000-1400_forTraining.root',
 # #     'QCD120-170_forTraining.root',
 # #     'QCD1400-1800_forTraining.root',
@@ -431,15 +416,15 @@ if __name__ == '__main__':
                                  "nCuts=20",
                                  "MaxDepth=4",
                                ]
-    train(bdtoptions)
+    # train(bdtoptions)
     # read("/shome/thaarres/HiggsTagger/rootfiles/", "r800_forTraining.root")
     # trainMultiClass()
-    inDirName="/shome/thaarres/HiggsTagger/weighted_rootfiles/"
+    inDirName="/shome/thaarres/HiggsTagger/new/"
     files = ['qcd_forTraining.root',
         'r2000_forTraining.root',
         'r800_forTraining.root'
         ]
     for f in files:
-#      read(inDirName, f)
+      read(inDirName, f)
 # readParallel()
 
