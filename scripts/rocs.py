@@ -9,26 +9,26 @@ def getPerformanceCurve(fFileS1, fFileB1, pTmin, pTmax, fXMin=0, fXMax=0):
     # h2_S_new = file_S1.Get(fPlotS1)
     # h2_B_new = file_B1.Get(fPlotB1)
     
-    h2_S_new = TH1F("hBDTGDisc_S","",1000,-5,5)
-    h2_B_new = TH1F("hBDTGDisc_B","",1000,-5,5)
-    h2_S_baseline = TH1F("hBaselineDisc_S","",1000,-5,5)
-    h2_B_baseline = TH1F("hBaselineDisc_B","",1000,-5,5)
-    h2_S_subjet = TH1F("hSubjetDisc_S","",1000,-5,5)
-    h2_B_subjet = TH1F("hSubjetDisc_B","",1000,-5,5)
+    h2_S_new = TH1F("hBDTGDisc_S","",1000,-5.,5.)
+    h2_B_new = TH1F("hBDTGDisc_B","",1000,-5.,5.)
+    h2_S_baseline = TH1F("hBaselineDisc_S","",1000,-5.,5.)
+    h2_B_baseline = TH1F("hBaselineDisc_B","",1000,-5.,5.)
+    h2_S_subjet = TH1F("hSubjetDisc_S","",1000,-5.,5.)
+    h2_B_subjet = TH1F("hSubjetDisc_B","",1000,-5.,5.)
     
-    S_bin1 = TH1F("S_bin1","",1000,-5,5)
-    S_bin2 = TH1F("S_bin2","",1000,-5,5)
-    S_bin3 = TH1F("S_bin3","",1000,-5,5)
-    B_bin1 = TH1F("B_bin1","",1000,-5,5)
-    B_bin2 = TH1F("B_bin2","",1000,-5,5)
-    B_bin3 = TH1F("B_bin3","",1000,-5,5)
+    S_bin1 = TH1F("S_bin1","",1000,-5.,5.)
+    S_bin2 = TH1F("S_bin2","",1000,-5.,5.)
+    S_bin3 = TH1F("S_bin3","",1000,-5.,5.)
+    B_bin1 = TH1F("B_bin1","",1000,-5.,5.)
+    B_bin2 = TH1F("B_bin2","",1000,-5.,5.)
+    B_bin3 = TH1F("B_bin3","",1000,-5.,5.)
     
-    S_bin1_subjet = TH1F("S_bin1_subjet","",1000,-5,5)
-    S_bin2_subjet = TH1F("S_bin2_subjet","",1000,-5,5)
-    S_bin3_subjet = TH1F("S_bin3_subjet","",1000,-5,5)
-    B_bin1_subjet = TH1F("B_bin1_subjet","",1000,-5,5)
-    B_bin2_subjet = TH1F("B_bin2_subjet","",1000,-5,5)
-    B_bin3_subjet = TH1F("B_bin3_subjet","",1000,-5,5)
+    S_bin1_subjet = TH1F("S_bin1_subjet","",1000,-5.,5.)
+    S_bin2_subjet = TH1F("S_bin2_subjet","",1000,-5.,5.)
+    S_bin3_subjet = TH1F("S_bin3_subjet","",1000,-5.,5.)
+    B_bin1_subjet = TH1F("B_bin1_subjet","",1000,-5.,5.)
+    B_bin2_subjet = TH1F("B_bin2_subjet","",1000,-5.,5.)
+    B_bin3_subjet = TH1F("B_bin3_subjet","",1000,-5.,5.)
     
     
     
@@ -44,28 +44,28 @@ def getPerformanceCurve(fFileS1, fFileB1, pTmin, pTmax, fXMin=0, fXMax=0):
         h2_S_baseline.Fill( event.baseline )
         h2_S_subjet.Fill( event.SubJet_csv )
         h2_S_new.Fill( event.BDTG )
-        if (event.ptPruned > 300. and event.ptPruned <= 470):
+        if (event.ptPruned > 300. and event.ptPruned <= 470.):
           S_bin1.Fill( event.BDTG )
           S_bin1_subjet.Fill( event.SubJet_csv )
-        if (event.ptPruned > 470. and event.ptPruned <= 600):
+        if (event.ptPruned > 470. and event.ptPruned <= 600.):
           S_bin2.Fill( event.BDTG )
           S_bin2_subjet.Fill( event.SubJet_csv )
-        if (event.ptPruned > 600. and event.ptPruned <= 2000):
+        if (event.ptPruned > 600. and event.ptPruned <= 2000.):
           S_bin3.Fill( event.BDTG )    
           S_bin3_subjet.Fill( event.SubJet_csv )
     
     for event in treeB:
-      if (abs(event.flavour)==5 and event.nbHadrons<2 and event.ptPruned > pTmin and event.ptPruned <= pTmax):
+      if (abs(event.flavour)!=5 and event.ptPruned > pTmin and event.ptPruned <= pTmax):
         h2_B_baseline.Fill( event.baseline )
         h2_B_subjet.Fill( event.SubJet_csv )
         h2_B_new.Fill( event.BDTG )
-        if (event.ptPruned > 300. and event.ptPruned <= 470):
+        if (event.ptPruned > 300. and event.ptPruned <= 470.):
           B_bin1.Fill( event.BDTG )
           B_bin1_subjet.Fill( event.SubJet_csv )
-        if (event.ptPruned > 470. and event.ptPruned <= 600):
+        if (event.ptPruned > 470. and event.ptPruned <= 600.):
           B_bin2.Fill( event.BDTG )
           B_bin2_subjet.Fill( event.SubJet_csv )
-        if (event.ptPruned > 600. and event.ptPruned <= 2000):
+        if (event.ptPruned > 600. and event.ptPruned <= 2000.):
           B_bin3.Fill( event.BDTG )
           B_bin3_subjet.Fill( event.SubJet_csv )
     
@@ -95,9 +95,6 @@ def getPerformanceCurve(fFileS1, fFileB1, pTmin, pTmax, fXMin=0, fXMax=0):
         num_B = float( h2_B_new.Integral(407-i,602) )
         g_new.SetPoint(i+43,(num_S/denom_S_1),1-(num_B/denom_B_1))
         # g_new.SetPoint(i+43,(num_B/denom_B_1),(num_S/denom_S_1) )
-    
-    
-    
     
     denom_S_1 = float( S_bin1.Integral(380,610) )
     denom_B_1 = float( B_bin1.Integral(380,610) )
@@ -166,27 +163,27 @@ def getPerformanceCurve(fFileS1, fFileB1, pTmin, pTmax, fXMin=0, fXMax=0):
         # g_new.SetPoint(i+43,(num_B/denom_B_1),(num_S/denom_S_1) )
 
     
-    denom_S_1 = float( h2_S_baseline.Integral(380,610) )
-    denom_B_1 = float( h2_B_baseline.Integral(380,610) )
-    
-    g_baseline = TGraph(49)
-
-    for i in range(5):
-        num_S = float( h2_S_baseline.Integral(602-i,602) )
-        num_B = float( h2_B_baseline.Integral(602-i,602) )
-        g_baseline.SetPoint( i,(num_S/denom_S_1),1-(num_B/denom_B_1) )
-        # g_baseline.SetPoint( i,(num_B/denom_B_1),(num_S/denom_S_1) )
-
-    for i in range(1,40):
-        num_S = float( h2_S_baseline.Integral(602-(i*5),602) )
-        num_B = float( h2_B_baseline.Integral(602-(i*5),602) )
-        g_baseline.SetPoint( i+4,(num_S/denom_S_1),1-(num_B/denom_B_1) )
-        # g_baseline.SetPoint(i+4,(num_B/denom_B_1),(num_S/denom_S_1) )
-    for i in range(1,6):
-        num_S = float( h2_S_baseline.Integral(407-i,602) )
-        num_B = float( h2_B_baseline.Integral(407-i,602) )
-        g_baseline.SetPoint(i+43,(num_S/denom_S_1),1-(num_B/denom_B_1))
-        # g_baseline.SetPoint(i+43,(num_B/denom_B_1),(num_S/denom_S_1) )
+    # denom_S_1 = float( h2_S_baseline.Integral(380,610) )
+  #   denom_B_1 = float( h2_B_baseline.Integral(380,610) )
+  #
+  #   g_baseline = TGraph(49)
+  #
+  #   for i in range(5):
+  #       num_S = float( h2_S_baseline.Integral(602-i,602) )
+  #       num_B = float( h2_B_baseline.Integral(602-i,602) )
+  #       g_baseline.SetPoint( i,(num_S/denom_S_1),1-(num_B/denom_B_1) )
+  #       # g_baseline.SetPoint( i,(num_B/denom_B_1),(num_S/denom_S_1) )
+  #
+  #   for i in range(1,40):
+  #       num_S = float( h2_S_baseline.Integral(602-(i*5),602) )
+  #       num_B = float( h2_B_baseline.Integral(602-(i*5),602) )
+  #       g_baseline.SetPoint( i+4,(num_S/denom_S_1),1-(num_B/denom_B_1) )
+  #       # g_baseline.SetPoint(i+4,(num_B/denom_B_1),(num_S/denom_S_1) )
+  #   for i in range(1,6):
+  #       num_S = float( h2_S_baseline.Integral(407-i,602) )
+  #       num_B = float( h2_B_baseline.Integral(407-i,602) )
+  #       g_baseline.SetPoint(i+43,(num_S/denom_S_1),1-(num_B/denom_B_1))
+  #       # g_baseline.SetPoint(i+43,(num_B/denom_B_1),(num_S/denom_S_1) )
         
    
     
@@ -211,13 +208,8 @@ def getPerformanceCurve(fFileS1, fFileB1, pTmin, pTmax, fXMin=0, fXMax=0):
         g_subjet.SetPoint(i+43,(num_S/denom_S_1),1-(num_B/denom_B_1))
         # g_subjet.SetPoint(i+43,(num_B/denom_B_1),(num_S/denom_S_1) )
         
-        
-        
-        
-        
-        
-    denom_S_1 = float( S_bin1.Integral(380,610) )
-    denom_B_1 = float( B_bin1.Integral(380,610) )
+    denom_S_1 = float( S_bin1_subjet.Integral(380,610) )
+    denom_B_1 = float( B_bin1_subjet.Integral(380,610) )
     g1_subjet = TGraph(49)
 
     for i in range(5):
@@ -234,7 +226,7 @@ def getPerformanceCurve(fFileS1, fFileB1, pTmin, pTmax, fXMin=0, fXMax=0):
     for i in range(1,6):
         num_S = float( S_bin1_subjet.Integral(407-i,602) )
         num_B = float( B_bin1_subjet.Integral(407-i,602) )
-        g1.SetPoint(i+43,(num_S/denom_S_1),1-(num_B/denom_B_1))
+        g1_subjet.SetPoint(i+43,(num_S/denom_S_1),1-(num_B/denom_B_1))
         # g_new.SetPoint(i+43,(num_B/denom_B_1),(num_S/denom_S_1) )
    
     
@@ -274,7 +266,7 @@ def getPerformanceCurve(fFileS1, fFileB1, pTmin, pTmax, fXMin=0, fXMax=0):
     for i in range(1,40):
         num_S = float( S_bin3_subjet.Integral(602-(i*5),602) )
         num_B = float( B_bin3_subjet.Integral(602-(i*5),602) )
-        g3.SetPoint( i+4,(num_S/denom_S_1),1-(num_B/denom_B_1) )
+        g3_subjet.SetPoint( i+4,(num_S/denom_S_1),1-(num_B/denom_B_1) )
         # g3.SetPoint(i+4,(num_B/denom_B_1),(num_S/denom_S_1) )
     for i in range(1,6):
         num_S = float( S_bin3_subjet.Integral(407-i,602) )
@@ -325,7 +317,7 @@ def plotPerformanceCurves(graphs, ordering, fTitle, fXAxisTitle, fYAxisTitle, fE
     c.SetGridx()
     c.SetGridy()
 
-    legend = TLegend(.16,.64,.36,.83)
+    legend = TLegend(.16,.54,.36,.73)
     legend.SetBorderSize(0)
     legend.SetFillColor(0)
     legend.SetFillStyle(0)
@@ -392,7 +384,7 @@ def makePlots():
    ordering.append("Subjet CSV: p_{T} > 600 GeV")
    
 
-   plotPerformanceCurves(mg,ordering,"","Tagging efficiency (H#rightarrowb#bar{b})","1 - mistagging efficiency (b)","70 GeV < M_{p} < 200 GeV , p_{T} > 300 GeV","SubjetVSinclusive_vs_b.png",0, 1, 1E-3, 1, 0)
+   plotPerformanceCurves(mg,ordering,"","Tagging efficiency (H#rightarrowb#bar{b})","1 - mistagging efficiency (udscg)","70 GeV < M_{p} < 200 GeV , p_{T} > 300 GeV","test_light.png",0, 1, 1E-3, 1, 0)
    
    
 
