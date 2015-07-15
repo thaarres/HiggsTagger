@@ -22,15 +22,16 @@ def getPerformanceCurve(fFileS1, fFileB1, pTmin, pTmax, fXMin=0, fXMax=0):
     B_bin1 = TH1F("B_bin1","",1000,-5.,5.)
     B_bin2 = TH1F("B_bin2","",1000,-5.,5.)
     B_bin3 = TH1F("B_bin3","",1000,-5.,5.)
-    
+    #
     S_bin1_subjet = TH1F("S_bin1_subjet","",1000,-5.,5.)
     S_bin2_subjet = TH1F("S_bin2_subjet","",1000,-5.,5.)
     S_bin3_subjet = TH1F("S_bin3_subjet","",1000,-5.,5.)
     B_bin1_subjet = TH1F("B_bin1_subjet","",1000,-5.,5.)
     B_bin2_subjet = TH1F("B_bin2_subjet","",1000,-5.,5.)
     B_bin3_subjet = TH1F("B_bin3_subjet","",1000,-5.,5.)
-    
-    
+    S_bin1_baseline = TH1F("S_bin1_baseline","",1000,-5.,5.)
+    B_bin1_baseline = TH1F("B_bin1_baseline","",1000,-5.,5.)
+
     
     
     treeS=file_S1.Get('tree') 
@@ -39,35 +40,48 @@ def getPerformanceCurve(fFileS1, fFileB1, pTmin, pTmax, fXMin=0, fXMax=0):
     Bentry = treeB.GetEntries() 
 
     for event in treeS:
+      if(event.SubJet_csv < -5):
+        subjetcsv = -1.
+      else:
+        subjetcsv = event.SubJet_csv  
       # if (abs(event.flavour)==5 and event.nbHadrons>1 and event.ptPruned > pTmin and event.ptPruned <= pTmax):
-      if (event.ptPruned > pTmin and event.ptPruned <= pTmax):
+      #if (event.ptPruned > pTmin and event.ptPruned <= pTmax):
         h2_S_baseline.Fill( event.baseline )
-        h2_S_subjet.Fill( event.SubJet_csv )
+        h2_S_subjet.Fill( subjetcsv )
         h2_S_new.Fill( event.BDTG )
-        if (event.ptPruned > 300. and event.ptPruned <= 470.):
+        if( (event.tau2/event.tau1) < 0.4 ):
           S_bin1.Fill( event.BDTG )
-          S_bin1_subjet.Fill( event.SubJet_csv )
-        if (event.ptPruned > 470. and event.ptPruned <= 600.):
-          S_bin2.Fill( event.BDTG )
-          S_bin2_subjet.Fill( event.SubJet_csv )
-        if (event.ptPruned > 600. and event.ptPruned <= 2000.):
-          S_bin3.Fill( event.BDTG )    
-          S_bin3_subjet.Fill( event.SubJet_csv )
+          S_bin1_subjet.Fill( subjetcsv )
+          S_bin1_baseline.Fill( event.baseline )
+        # if (event.ptPruned > 300. and event.ptPruned <= 470.):
+ #          S_bin1.Fill( event.BDTG )
+ #          S_bin1_subjet.Fill( event.SubJet_csv )
+ #        if (event.ptPruned > 470. and event.ptPruned <= 600.):
+ #          S_bin2.Fill( event.BDTG )
+ #          S_bin2_subjet.Fill( event.SubJet_csv )
+ #        if (event.ptPruned > 600. and event.ptPruned <= 2000.):
+ #          S_bin3.Fill( event.BDTG )
+ #          S_bin3_subjet.Fill( event.SubJet_csv )
     
     for event in treeB:
-      if (abs(event.flavour)!=5 and event.ptPruned > pTmin and event.ptPruned <= pTmax):
+      if(event.SubJet_csv < -5):
+        subjetcsv = -1.
+      else:
+        subjetcsv = event.SubJet_csv
+      if (abs(event.flavour)==5 and event.nbHadrons>1):# and event.ptPruned > pTmin and event.ptPruned <= pTmax):
         h2_B_baseline.Fill( event.baseline )
-        h2_B_subjet.Fill( event.SubJet_csv )
+        h2_B_subjet.Fill( subjetcsv )
         h2_B_new.Fill( event.BDTG )
-        if (event.ptPruned > 300. and event.ptPruned <= 470.):
+        if( (event.tau2/event.tau1) < 0.4 ):
           B_bin1.Fill( event.BDTG )
-          B_bin1_subjet.Fill( event.SubJet_csv )
-        if (event.ptPruned > 470. and event.ptPruned <= 600.):
-          B_bin2.Fill( event.BDTG )
-          B_bin2_subjet.Fill( event.SubJet_csv )
-        if (event.ptPruned > 600. and event.ptPruned <= 2000.):
-          B_bin3.Fill( event.BDTG )
-          B_bin3_subjet.Fill( event.SubJet_csv )
+          B_bin1_subjet.Fill( subjetcsv )
+          B_bin1_baseline.Fill( event.baseline )
+        # if (event.ptPruned > 470. and event.ptPruned <= 600.):
+ #          B_bin2.Fill( event.BDTG )
+ #          B_bin2_subjet.Fill( event.SubJet_csv )
+ #        if (event.ptPruned > 600. and event.ptPruned <= 2000.):
+ #          B_bin3.Fill( event.BDTG )
+ #          B_bin3_subjet.Fill( event.SubJet_csv )
     
     
     
@@ -75,26 +89,28 @@ def getPerformanceCurve(fFileS1, fFileB1, pTmin, pTmax, fXMin=0, fXMax=0):
     mg = []    
 
     #total jet count for denominator of efficiency calculation
-    denom_S_1 = float( h2_S_new.Integral(380,610) )
-    denom_B_1 = float( h2_B_new.Integral(380,610) )
+    denom_S_new = float( h2_S_new.Integral(380,610) )
+    denom_B_new = float( h2_B_new.Integral(380,610) )
     g_new = TGraph(49)
 
     for i in range(5):
-        num_S = float( h2_S_new.Integral(602-i,602) )
-        num_B = float( h2_B_new.Integral(602-i,602) )
-        g_new.SetPoint( i,(num_S/denom_S_1),1-(num_B/denom_B_1) )
-        # g_new.SetPoint( i,(num_B/denom_B_1),(num_S/denom_S_1) )
+        num_S_new = float( h2_S_new.Integral(602-i,602) )
+        num_B_new = float( h2_B_new.Integral(602-i,602) )
+        g_new.SetPoint( i,(num_S_new/denom_S_new),1-(num_B_new/denom_B_new) )
+        # g_new.SetPoint( i,(num_B_new/denom_B_new),(num_S_new/denom_S_new) )
 
     for i in range(1,40):
-        num_S = float( h2_S_new.Integral(602-(i*5),602) )
-        num_B = float( h2_B_new.Integral(602-(i*5),602) )
-        g_new.SetPoint( i+4,(num_S/denom_S_1),1-(num_B/denom_B_1) )
-        # g_eff_4.SetPoint(i+4,(num_B/denom_B_1),(num_S/denom_S_1) )
+        num_S_new = float( h2_S_new.Integral(602-(i*5),602) )
+        num_B_new = float( h2_B_new.Integral(602-(i*5),602) )
+        g_new.SetPoint( i+4,(num_S_new/denom_S_new),1-(num_B_new/denom_B_new) )
+        # g_eff_4.SetPoint(i+4,(num_B_new/denom_B_new),(num_S_new/denom_S_new) )
     for i in range(1,6):
-        num_S = float( h2_S_new.Integral(407-i,602) )
-        num_B = float( h2_B_new.Integral(407-i,602) )
-        g_new.SetPoint(i+43,(num_S/denom_S_1),1-(num_B/denom_B_1))
-        # g_new.SetPoint(i+43,(num_B/denom_B_1),(num_S/denom_S_1) )
+        num_S_new = float( h2_S_new.Integral(407-i,602) )
+        num_B_new = float( h2_B_new.Integral(407-i,602) )
+        g_new.SetPoint(i+43,(num_S_new/denom_S_new),1-(num_B_new/denom_B_new))
+        # g_new.SetPoint(i+43,(num_B_new/denom_B_new),(num_S_new/denom_S_new) )
+    
+    
     
     denom_S_1 = float( S_bin1.Integral(380,610) )
     denom_B_1 = float( B_bin1.Integral(380,610) )
@@ -115,98 +131,98 @@ def getPerformanceCurve(fFileS1, fFileB1, pTmin, pTmax, fXMin=0, fXMax=0):
         num_S = float( S_bin1.Integral(407-i,602) )
         num_B = float( B_bin1.Integral(407-i,602) )
         g1.SetPoint(i+43,(num_S/denom_S_1),1-(num_B/denom_B_1))
-        # g_new.SetPoint(i+43,(num_B/denom_B_1),(num_S/denom_S_1) )
+       # g1.SetPoint(i+43,(num_B/denom_B_1),(num_S/denom_S_1) )
    
     
-    denom_S_1 = float( S_bin2.Integral(380,610) )
-    denom_B_1 = float( B_bin2.Integral(380,610) ) 
-    g2 = TGraph(49)
+    # denom_S_1 = float( S_bin2.Integral(380,610) )
+ #    denom_B_1 = float( B_bin2.Integral(380,610) )
+ #    g2 = TGraph(49)
+ #
+ #    for i in range(5):
+ #        num_S = float( S_bin2.Integral(602-i,602) )
+ #        num_B = float( B_bin2.Integral(602-i,602) )
+ #        g2.SetPoint( i,(num_S/denom_S_1),1-(num_B/denom_B_1) )
+ #        # g1.SetPoint( i,(num_B/denom_B_1),(num_S/denom_S_1) )
+ #
+ #    for i in range(1,40):
+ #        num_S = float( S_bin2.Integral(602-(i*5),602) )
+ #        num_B = float( B_bin2.Integral(602-(i*5),602) )
+ #        g2.SetPoint( i+4,(num_S/denom_S_1),1-(num_B/denom_B_1) )
+ #        # g1.SetPoint(i+4,(num_B/denom_B_1),(num_S/denom_S_1) )
+ #    for i in range(1,6):
+ #        num_S = float( S_bin2.Integral(407-i,602) )
+ #        num_B = float( B_bin2.Integral(407-i,602) )
+ #        g2.SetPoint(i+43,(num_S/denom_S_1),1-(num_B/denom_B_1))
+ #        # g_new.SetPoint(i+43,(num_B/denom_B_1),(num_S/denom_S_1) )
+ #
+ #
+ #    denom_S_1 = float( S_bin3.Integral(380,610) )
+ #    denom_B_1 = float( B_bin3.Integral(380,610) )
+ #
+ #    g3 = TGraph(49)
+ #
+ #    for i in range(5):
+ #        num_S = float( S_bin3.Integral(602-i,602) )
+ #        num_B = float( B_bin3.Integral(602-i,602) )
+ #        g3.SetPoint( i,(num_S/denom_S_1),1-(num_B/denom_B_1) )
+ #        # g3.SetPoint( i,(num_B/denom_B_1),(num_S/denom_S_1) )
+ #
+ #    for i in range(1,40):
+ #        num_S = float( S_bin3.Integral(602-(i*5),602) )
+ #        num_B = float( B_bin3.Integral(602-(i*5),602) )
+ #        g3.SetPoint( i+4,(num_S/denom_S_1),1-(num_B/denom_B_1) )
+ #        # g3.SetPoint(i+4,(num_B/denom_B_1),(num_S/denom_S_1) )
+ #    for i in range(1,6):
+ #        num_S = float( S_bin3.Integral(407-i,602) )
+ #        num_B = float( B_bin3.Integral(407-i,602) )
+ #        g3.SetPoint(i+43,(num_S/denom_S_1),1-(num_B/denom_B_1))
+        # g_new.SetPoint(i+43,(num_B/denom_B_1),(num_S/denom_S_1) )
+
+    
+    denom_S_baseline = float( h2_S_baseline.Integral(380,610) )
+    denom_B_baseline = float( h2_B_baseline.Integral(380,610) )
+
+    g_baseline = TGraph(49)
 
     for i in range(5):
-        num_S = float( S_bin2.Integral(602-i,602) )
-        num_B = float( B_bin2.Integral(602-i,602) )
-        g2.SetPoint( i,(num_S/denom_S_1),1-(num_B/denom_B_1) )
-        # g1.SetPoint( i,(num_B/denom_B_1),(num_S/denom_S_1) )
+        num_S_baseline = float( h2_S_baseline.Integral(602-i,602) )
+        num_B_baseline = float( h2_B_baseline.Integral(602-i,602) )
+        g_baseline.SetPoint( i,(num_S_baseline/denom_S_baseline),1-(num_B_baseline/denom_B_baseline) )
+        # g_baseline.SetPoint( i,(num_B_baseline/denom_B_baseline),(num_S_baseline/denom_S_baseline) )
 
     for i in range(1,40):
-        num_S = float( S_bin2.Integral(602-(i*5),602) )
-        num_B = float( B_bin2.Integral(602-(i*5),602) )
-        g2.SetPoint( i+4,(num_S/denom_S_1),1-(num_B/denom_B_1) )
-        # g1.SetPoint(i+4,(num_B/denom_B_1),(num_S/denom_S_1) )
+        num_S_baseline = float( h2_S_baseline.Integral(602-(i*5),602) )
+        num_B_baseline = float( h2_B_baseline.Integral(602-(i*5),602) )
+        g_baseline.SetPoint( i+4,(num_S_baseline/denom_S_baseline),1-(num_B_baseline/denom_B_baseline) )
+        # g_baseline.SetPoint(i+4,(num_B_baseline/denom_B_baseline),(num_S_baseline/denom_S_baseline) )
     for i in range(1,6):
-        num_S = float( S_bin2.Integral(407-i,602) )
-        num_B = float( B_bin2.Integral(407-i,602) )
-        g2.SetPoint(i+43,(num_S/denom_S_1),1-(num_B/denom_B_1))
-        # g_new.SetPoint(i+43,(num_B/denom_B_1),(num_S/denom_S_1) )
-    
-    
-    denom_S_1 = float( S_bin3.Integral(380,610) )
-    denom_B_1 = float( B_bin3.Integral(380,610) )
-    
-    g3 = TGraph(49)
+        num_S_baseline = float( h2_S_baseline.Integral(407-i,602) )
+        num_B_baseline = float( h2_B_baseline.Integral(407-i,602) )
+        g_baseline.SetPoint(i+43,(num_S_baseline/denom_S_baseline),1-(num_B_baseline/denom_B_baseline))
+        # g_baseline.SetPoint(i+43,(num_B_baseline/denom_B_baseline),(num_S/denom_S_baseline) )
 
-    for i in range(5):
-        num_S = float( S_bin3.Integral(602-i,602) )
-        num_B = float( B_bin3.Integral(602-i,602) )
-        g3.SetPoint( i,(num_S/denom_S_1),1-(num_B/denom_B_1) )
-        # g3.SetPoint( i,(num_B/denom_B_1),(num_S/denom_S_1) )
-
-    for i in range(1,40):
-        num_S = float( S_bin3.Integral(602-(i*5),602) )
-        num_B = float( B_bin3.Integral(602-(i*5),602) )
-        g3.SetPoint( i+4,(num_S/denom_S_1),1-(num_B/denom_B_1) )
-        # g3.SetPoint(i+4,(num_B/denom_B_1),(num_S/denom_S_1) )
-    for i in range(1,6):
-        num_S = float( S_bin3.Integral(407-i,602) )
-        num_B = float( B_bin3.Integral(407-i,602) )
-        g3.SetPoint(i+43,(num_S/denom_S_1),1-(num_B/denom_B_1))
-        # g_new.SetPoint(i+43,(num_B/denom_B_1),(num_S/denom_S_1) )
 
     
-    # denom_S_1 = float( h2_S_baseline.Integral(380,610) )
-  #   denom_B_1 = float( h2_B_baseline.Integral(380,610) )
-  #
-  #   g_baseline = TGraph(49)
-  #
-  #   for i in range(5):
-  #       num_S = float( h2_S_baseline.Integral(602-i,602) )
-  #       num_B = float( h2_B_baseline.Integral(602-i,602) )
-  #       g_baseline.SetPoint( i,(num_S/denom_S_1),1-(num_B/denom_B_1) )
-  #       # g_baseline.SetPoint( i,(num_B/denom_B_1),(num_S/denom_S_1) )
-  #
-  #   for i in range(1,40):
-  #       num_S = float( h2_S_baseline.Integral(602-(i*5),602) )
-  #       num_B = float( h2_B_baseline.Integral(602-(i*5),602) )
-  #       g_baseline.SetPoint( i+4,(num_S/denom_S_1),1-(num_B/denom_B_1) )
-  #       # g_baseline.SetPoint(i+4,(num_B/denom_B_1),(num_S/denom_S_1) )
-  #   for i in range(1,6):
-  #       num_S = float( h2_S_baseline.Integral(407-i,602) )
-  #       num_B = float( h2_B_baseline.Integral(407-i,602) )
-  #       g_baseline.SetPoint(i+43,(num_S/denom_S_1),1-(num_B/denom_B_1))
-  #       # g_baseline.SetPoint(i+43,(num_B/denom_B_1),(num_S/denom_S_1) )
-        
-   
-    
-    denom_S_1 = float( h2_S_subjet.Integral(380,610) )
-    denom_B_1 = float( h2_B_subjet.Integral(380,610) )
+    denom_S_subjet = float( h2_S_subjet.Integral(380,610) )
+    denom_B_subjet = float( h2_B_subjet.Integral(380,610) )
     g_subjet = TGraph(49)
 
     for i in range(5):
-        num_S = float( h2_S_subjet.Integral(602-i,602) )
-        num_B = float( h2_B_subjet.Integral(602-i,602) )
-        g_subjet.SetPoint( i,(num_S/denom_S_1),1-(num_B/denom_B_1) )
-        # g_subjet.SetPoint( i,(num_B/denom_B_1),(num_S/denom_S_1) )
+        num_S_subjet = float( h2_S_subjet.Integral(602-i,602) )
+        num_B_subjet = float( h2_B_subjet.Integral(602-i,602) )
+        g_subjet.SetPoint( i,(num_S_subjet/denom_S_subjet),1-(num_B_subjet/denom_B_subjet) )
+        # g_subjet.SetPoint( i,(num_B_subjet/denom_B_subjet),(num_S_subjet/denom_S_subjet) )
 
     for i in range(1,40):
-        num_S = float( h2_S_subjet.Integral(602-(i*5),602) )
-        num_B = float( h2_B_subjet.Integral(602-(i*5),602) )
-        g_subjet.SetPoint( i+4,(num_S/denom_S_1),1-(num_B/denom_B_1) )
-        # g_subjet.SetPoint(i+4,(num_B/denom_B_1),(num_S/denom_S_1) )
+        num_S_subjet = float( h2_S_subjet.Integral(602-(i*5),602) )
+        num_B_subjet = float( h2_B_subjet.Integral(602-(i*5),602) )
+        g_subjet.SetPoint( i+4,(num_S_subjet/denom_S_subjet),1-(num_B_subjet/denom_B_subjet) )
+        # g_subjet.SetPoint(i+4,(num_B_subjet/denom_B_subjet),(num_S_subjet/denom_S_subjet) )
     for i in range(1,6):
-        num_S = float( h2_S_subjet.Integral(407-i,602) )
-        num_B = float( h2_B_subjet.Integral(407-i,602) )
-        g_subjet.SetPoint(i+43,(num_S/denom_S_1),1-(num_B/denom_B_1))
-        # g_subjet.SetPoint(i+43,(num_B/denom_B_1),(num_S/denom_S_1) )
+        num_S_subjet = float( h2_S_subjet.Integral(407-i,602) )
+        num_B_subjet = float( h2_B_subjet.Integral(407-i,602) )
+        g_subjet.SetPoint(i+43,(num_S_subjet/denom_S_subjet),1-(num_B_subjet/denom_B_subjet))
+        # g_subjet.SetPoint(i+43,(num_B_subjet/denom_B_subjet),(num_S_subjet/denom_S_subjet) )
         
     denom_S_1 = float( S_bin1_subjet.Integral(380,610) )
     denom_B_1 = float( B_bin1_subjet.Integral(380,610) )
@@ -230,60 +246,81 @@ def getPerformanceCurve(fFileS1, fFileB1, pTmin, pTmax, fXMin=0, fXMax=0):
         # g_new.SetPoint(i+43,(num_B/denom_B_1),(num_S/denom_S_1) )
    
     
-    denom_S_1 = float( S_bin2_subjet.Integral(380,610) )
-    denom_B_1 = float( B_bin2_subjet.Integral(380,610) ) 
-    g2_subjet = TGraph(49)
+    denom_S_1 = float( S_bin1_baseline.Integral(380,610) )
+    denom_B_1 = float( B_bin1_baseline.Integral(380,610) )
+    g1_baseline = TGraph(49)
 
     for i in range(5):
-        num_S = float( S_bin2_subjet.Integral(602-i,602) )
-        num_B = float( B_bin2_subjet.Integral(602-i,602) )
-        g2_subjet.SetPoint( i,(num_S/denom_S_1),1-(num_B/denom_B_1) )
+        num_S = float( S_bin1_baseline.Integral(602-i,602) )
+        num_B = float( B_bin1_baseline.Integral(602-i,602) )
+        g1_baseline.SetPoint( i,(num_S/denom_S_1),1-(num_B/denom_B_1) )
         # g1.SetPoint( i,(num_B/denom_B_1),(num_S/denom_S_1) )
 
     for i in range(1,40):
-        num_S = float( S_bin2_subjet.Integral(602-(i*5),602) )
-        num_B = float( B_bin2_subjet.Integral(602-(i*5),602) )
-        g2_subjet.SetPoint( i+4,(num_S/denom_S_1),1-(num_B/denom_B_1) )
+        num_S = float( S_bin1_baseline.Integral(602-(i*5),602) )
+        num_B = float( B_bin1_baseline.Integral(602-(i*5),602) )
+        g1_baseline.SetPoint( i+4,(num_S/denom_S_1),1-(num_B/denom_B_1) )
         # g1.SetPoint(i+4,(num_B/denom_B_1),(num_S/denom_S_1) )
     for i in range(1,6):
-        num_S = float( S_bin2_subjet.Integral(407-i,602) )
-        num_B = float( B_bin2_subjet.Integral(407-i,602) )
-        g2_subjet.SetPoint(i+43,(num_S/denom_S_1),1-(num_B/denom_B_1))
-        # g_new.SetPoint(i+43,(num_B/denom_B_1),(num_S/denom_S_1) )
-    
-    
-    denom_S_1 = float( S_bin3_subjet.Integral(380,610) )
-    denom_B_1 = float( B_bin3_subjet.Integral(380,610) )
-    
-    g3_subjet = TGraph(49)
-
-    for i in range(5):
-        num_S = float( S_bin3_subjet.Integral(602-i,602) )
-        num_B = float( B_bin3_subjet.Integral(602-i,602) )
-        g3_subjet.SetPoint( i,(num_S/denom_S_1),1-(num_B/denom_B_1) )
-        # g3.SetPoint( i,(num_B/denom_B_1),(num_S/denom_S_1) )
-
-    for i in range(1,40):
-        num_S = float( S_bin3_subjet.Integral(602-(i*5),602) )
-        num_B = float( B_bin3_subjet.Integral(602-(i*5),602) )
-        g3_subjet.SetPoint( i+4,(num_S/denom_S_1),1-(num_B/denom_B_1) )
-        # g3.SetPoint(i+4,(num_B/denom_B_1),(num_S/denom_S_1) )
-    for i in range(1,6):
-        num_S = float( S_bin3_subjet.Integral(407-i,602) )
-        num_B = float( B_bin3_subjet.Integral(407-i,602) )
-        g3_subjet.SetPoint(i+43,(num_S/denom_S_1),1-(num_B/denom_B_1))
-        # g_new.SetPoint(i+43,(num_B/denom_B_1),(num_S/denom_S_1) )
+        num_S = float( S_bin1_baseline.Integral(407-i,602) )
+        num_B = float( B_bin1_baseline.Integral(407-i,602) )
+        g1_baseline.SetPoint(i+43,(num_S/denom_S_1),1-(num_B/denom_B_1))
+        
+    # denom_S_1 = float( S_bin2_subjet.Integral(380,610) )
+ #    denom_B_1 = float( B_bin2_subjet.Integral(380,610) )
+ #    g2_subjet = TGraph(49)
+ #
+ #    for i in range(5):
+ #        num_S = float( S_bin2_subjet.Integral(602-i,602) )
+ #        num_B = float( B_bin2_subjet.Integral(602-i,602) )
+ #        g2_subjet.SetPoint( i,(num_S/denom_S_1),1-(num_B/denom_B_1) )
+ #        # g1.SetPoint( i,(num_B/denom_B_1),(num_S/denom_S_1) )
+ #
+ #    for i in range(1,40):
+ #        num_S = float( S_bin2_subjet.Integral(602-(i*5),602) )
+ #        num_B = float( B_bin2_subjet.Integral(602-(i*5),602) )
+ #        g2_subjet.SetPoint( i+4,(num_S/denom_S_1),1-(num_B/denom_B_1) )
+ #        # g1.SetPoint(i+4,(num_B/denom_B_1),(num_S/denom_S_1) )
+ #    for i in range(1,6):
+ #        num_S = float( S_bin2_subjet.Integral(407-i,602) )
+ #        num_B = float( B_bin2_subjet.Integral(407-i,602) )
+ #        g2_subjet.SetPoint(i+43,(num_S/denom_S_1),1-(num_B/denom_B_1))
+ #        # g_new.SetPoint(i+43,(num_B/denom_B_1),(num_S/denom_S_1) )
+ #
+ #
+ #    denom_S_1 = float( S_bin3_subjet.Integral(380,610) )
+ #    denom_B_1 = float( B_bin3_subjet.Integral(380,610) )
+ #
+ #    g3_subjet = TGraph(49)
+ #
+ #    for i in range(5):
+ #        num_S = float( S_bin3_subjet.Integral(602-i,602) )
+ #        num_B = float( B_bin3_subjet.Integral(602-i,602) )
+ #        g3_subjet.SetPoint( i,(num_S/denom_S_1),1-(num_B/denom_B_1) )
+ #        # g3.SetPoint( i,(num_B/denom_B_1),(num_S/denom_S_1) )
+ #
+ #    for i in range(1,40):
+ #        num_S = float( S_bin3_subjet.Integral(602-(i*5),602) )
+ #        num_B = float( B_bin3_subjet.Integral(602-(i*5),602) )
+ #        g3_subjet.SetPoint( i+4,(num_S/denom_S_1),1-(num_B/denom_B_1) )
+ #        # g3.SetPoint(i+4,(num_B/denom_B_1),(num_S/denom_S_1) )
+ #    for i in range(1,6):
+ #        num_S = float( S_bin3_subjet.Integral(407-i,602) )
+ #        num_B = float( B_bin3_subjet.Integral(407-i,602) )
+ #        g3_subjet.SetPoint(i+43,(num_S/denom_S_1),1-(num_B/denom_B_1))
+ #        # g_new.SetPoint(i+43,(num_B/denom_B_1),(num_S/denom_S_1) )
         
        
     mg.append(g_new)     
-    mg.append(g1)   
-    mg.append(g2)
-    mg.append(g3)         
-    #mg.append(g_baseline)       
+    mg.append(g1)
+    # mg.append(g2)
+    # mg.append(g3)
+    mg.append(g_baseline)
+    mg.append(g1_baseline)
     mg.append(g_subjet) 
-    mg.append(g1_subjet)   
-    mg.append(g2_subjet)
-    mg.append(g3_subjet) 
+    mg.append(g1_subjet)
+    # mg.append(g2_subjet)
+    # mg.append(g3_subjet)
 
     return mg
 
@@ -325,7 +362,7 @@ def plotPerformanceCurves(graphs, ordering, fTitle, fXAxisTitle, fYAxisTitle, fE
     legend.SetTextSize(0.021)
 
     graphCounter = 0
-    for g in range(0,len(ordering)):
+    for g in range(0,len(graphs)):
         graph = graphs[g]
         legend.AddEntry(graph, ordering[g],"l")
         formatGraph(graph,graphCounter)
@@ -361,6 +398,8 @@ def plotPerformanceCurves(graphs, ordering, fTitle, fXAxisTitle, fYAxisTitle, fE
     l1.DrawLatex(0.2,0.42, fExtraInfo)
 
     c.SaveAs(fOutputFile)
+    f = TFile("file3.root","UPDATE");
+    c.Write()
 
 
 def makePlots():
@@ -369,22 +408,30 @@ def makePlots():
    ordering = [] # vectors storing the order of legend entries
    mg = [] # maps to hold legend entries and TGraph*s
 
-   mg = getPerformanceCurve("validation/new_validation_rAll_forTraining.root","validation/new_validation_qcd_forTraining.root",300.,2000.)
+   mg = getPerformanceCurve("validation/tau21_validation_rAll_forTraining.root","validation/tau21_validation_qcd_forTraining.root",300.,2000.)
    
    # ordering.append("Inclusive QCD")
-#    ordering.append("Baseline")
-#    ordering.append("Subjet CSV")
+   # ordering.append("Baseline")
+   # ordering.append("Subjet CSV")
+   # ordering.append("Inclusive: All")
+   # ordering.append("Inclusive: 300 GeV < p_{T} < 470 GeV")
+   # ordering.append("Inclusive: 470 GeV < p_{T} < 600 GeV")
+   # ordering.append("Inclusive: p_{T} > 600 GeV")
+   # ordering.append("Subjet CSV: All")
+   # ordering.append("Subjet CSV: 300 GeV < p_{T} < 470 GeV")
+   # ordering.append("Subjet CSV: 470 GeV < p_{T} < 600 GeV")
+   # ordering.append("Subjet CSV: p_{T} > 600 GeV")
    ordering.append("Inclusive: All")
-   ordering.append("Inclusive: 300 GeV < p_{T} < 470 GeV")
-   ordering.append("Inclusive: 470 GeV < p_{T} < 600 GeV")
-   ordering.append("Inclusive: p_{T} > 600 GeV")
+   ordering.append("Inclusive: #tau_{21} < 0.4")
+   ordering.append("Baseline: All")
+   ordering.append("Baseline: #tau_{21} < 0.4")
    ordering.append("Subjet CSV: All")
-   ordering.append("Subjet CSV: 300 GeV < p_{T} < 470 GeV")
-   ordering.append("Subjet CSV: 470 GeV < p_{T} < 600 GeV")
-   ordering.append("Subjet CSV: p_{T} > 600 GeV")
+   ordering.append("Subjet CSV: #tau_{21} < 0.4")
+   
    
 
-   plotPerformanceCurves(mg,ordering,"","Tagging efficiency (H#rightarrowb#bar{b})","1 - mistagging efficiency (udscg)","70 GeV < M_{p} < 200 GeV , p_{T} > 300 GeV","test_light.png",0, 1, 1E-3, 1, 0)
+
+   plotPerformanceCurves(mg,ordering,"","Tagging efficiency (H#rightarrowb#bar{b})","1 - mistagging efficiency (GSO)","70 GeV < M_{p} < 200 GeV , p_{T} > 300 GeV","WithTau21_gsp2.png",0, 1, 1E-3, 1, 0)
    
    
 
